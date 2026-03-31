@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
-import { Building2, Upload, RefreshCw } from 'lucide-react';
+import { Building2, Upload, RefreshCw, List } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 
@@ -41,7 +41,14 @@ export default async function AdminPage() {
       </div>
 
       {/* Actions */}
-      <div className="mb-8 grid gap-4 sm:grid-cols-3">
+      <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Link href="/admin/counties">
+          <Card className="cursor-pointer hover:border-blue-200 hover:shadow-md transition-all text-center">
+            <List className="mx-auto mb-2 h-6 w-6 text-blue-600" />
+            <div className="font-medium">Manage Counties</div>
+            <div className="text-sm text-gray-500">Edit, add, remove counties</div>
+          </Card>
+        </Link>
         <Link href="/admin/upload">
           <Card className="cursor-pointer hover:border-blue-200 hover:shadow-md transition-all text-center">
             <Upload className="mx-auto mb-2 h-6 w-6 text-blue-600" />
@@ -49,18 +56,18 @@ export default async function AdminPage() {
             <div className="text-sm text-gray-500">Bulk import counties</div>
           </Card>
         </Link>
-        <Link href="/directory">
-          <Card className="cursor-pointer hover:border-blue-200 hover:shadow-md transition-all text-center">
-            <Building2 className="mx-auto mb-2 h-6 w-6 text-blue-600" />
-            <div className="font-medium">Browse Counties</div>
-            <div className="text-sm text-gray-500">View and manage all counties</div>
-          </Card>
-        </Link>
         <Link href="/admin/scrape">
           <Card className="cursor-pointer hover:border-blue-200 hover:shadow-md transition-all text-center">
             <RefreshCw className="mx-auto mb-2 h-6 w-6 text-blue-600" />
-            <div className="font-medium">Trigger Scrapes</div>
-            <div className="text-sm text-gray-500">Manual scrape controls</div>
+            <div className="font-medium">Scrape Manager</div>
+            <div className="text-sm text-gray-500">Run and monitor scrapes</div>
+          </Card>
+        </Link>
+        <Link href="/directory">
+          <Card className="cursor-pointer hover:border-blue-200 hover:shadow-md transition-all text-center">
+            <Building2 className="mx-auto mb-2 h-6 w-6 text-blue-600" />
+            <div className="font-medium">Public Directory</div>
+            <div className="text-sm text-gray-500">View public-facing site</div>
           </Card>
         </Link>
       </div>

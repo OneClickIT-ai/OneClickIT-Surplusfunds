@@ -28,6 +28,12 @@ export default async function HomePage() {
 
   return (
     <div>
+      {/* Launch banner */}
+      <div className="bg-green-600 px-4 py-2.5 text-center text-sm font-medium text-white">
+        Official Launch: April 7, 2026 &mdash;{' '}
+        <a href="/auth/signup" className="underline hover:text-green-100">Sign up now for early access</a>
+      </div>
+
       {/* Hero */}
       <section className="bg-gradient-to-br from-blue-600 to-blue-800 px-4 py-16 sm:py-24">
         <div className="mx-auto max-w-3xl text-center">

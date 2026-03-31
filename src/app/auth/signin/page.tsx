@@ -1,50 +1,39 @@
 'use client';
-import { signIn, getProviders } from 'next-auth/react';
-import { useEffect, useState } from 'react';
-import { MapPin } from 'lucide-react';
+import { signIn } from 'next-auth/react';
+import Image from 'next/image';
+import Link from 'next/link';
 import Button from '@/components/ui/Button';
 
-interface Provider {
-  id: string;
-  name: string;
-}
-
 export default function SignInPage() {
-  const [providers, setProviders] = useState<Record<string, Provider>>({});
-
-  useEffect(() => {
-    getProviders().then(p => {
-      if (p) setProviders(p as unknown as Record<string, Provider>);
-    });
-  }, []);
-
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <div className="mb-3 flex justify-center">
-            <div className="rounded-xl bg-blue-600 p-3">
-              <MapPin className="h-6 w-6 text-white" />
-            </div>
+            <Image src="/surplusfunds_favicon.png" alt="Surplus Funds" width={48} height={48} className="h-12 w-12" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Sign in</h1>
-          <p className="text-sm text-gray-500">Access your surplus funds dashboard</p>
+          <h1 className="text-2xl font-bold text-gray-900">Welcome back</h1>
+          <p className="text-sm text-gray-500">Sign in to your surplus funds dashboard</p>
         </div>
 
         <div className="space-y-3">
-          {Object.values(providers).map(provider => (
-            <Button
-              key={provider.id}
-              className="w-full"
-              variant={provider.id === 'google' ? 'primary' : 'outline'}
-              onClick={() => signIn(provider.id, { callbackUrl: '/dashboard' })}
-            >
-              Sign in with {provider.name}
-            </Button>
-          ))}
+          <Button
+            className="w-full"
+            variant="primary"
+            onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
+          >
+            Sign in with Google
+          </Button>
         </div>
 
-        <p className="mt-6 text-center text-xs text-gray-400">
+        <p className="mt-6 text-center text-sm text-gray-500">
+          Don&apos;t have an account?{' '}
+          <Link href="/auth/signup" className="text-blue-600 hover:underline font-medium">
+            Sign up free
+          </Link>
+        </p>
+
+        <p className="mt-4 text-center text-xs text-gray-400">
           By signing in, you agree that surplus funds data is public information.
           No legal claims are made on your behalf.
         </p>

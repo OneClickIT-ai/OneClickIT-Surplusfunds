@@ -1,9 +1,8 @@
 'use client';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useSession, signIn, signOut } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { Search, LayoutDashboard, Settings, LogOut, LogIn, Shield, CreditCard } from 'lucide-react';
-import Button from '@/components/ui/Button';
 
 export default function Header() {
   const { data: session } = useSession();
@@ -82,10 +81,21 @@ export default function Header() {
               </button>
             </>
           ) : (
-            <Button size="sm" onClick={() => signIn()}>
-              <LogIn className="mr-1.5 h-4 w-4" />
-              Sign in
-            </Button>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/auth/signin"
+                className="rounded-lg px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/auth/signup"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700"
+              >
+                <LogIn className="h-4 w-4" />
+                Sign up
+              </Link>
+            </div>
           )}
         </nav>
       </div>

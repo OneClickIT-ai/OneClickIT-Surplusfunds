@@ -30,7 +30,7 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
-    async signIn({ user, account }) {
+    async signIn({ user }) {
       if (!user.email) return true;
       // Auto-elevate admin emails on sign-in
       if (ADMIN_EMAILS.includes(user.email)) {

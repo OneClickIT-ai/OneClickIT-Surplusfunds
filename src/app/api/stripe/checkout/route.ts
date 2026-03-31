@@ -1,14 +1,15 @@
 import { NextRequest } from 'next/server';
-import Stripe from 'stripe';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { ok, err } from '@/lib/api-utils';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-03-25.dahlia',
-});
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return err('Stripe not configured', 503);
+  }
+
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) return err('Unauthorized', 401);
 
@@ -16,6 +17,11 @@ export async function POST(request: NextRequest) {
   if (!priceId) return err('Price ID required', 400);
 
   try {
+    const Stripe = (await import('stripe')).default;
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2026-03-25.dahlia',
+    });
+
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card'],

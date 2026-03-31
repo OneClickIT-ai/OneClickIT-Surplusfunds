@@ -46,8 +46,35 @@ export async function searchPeople(name: string) {
   };
 }
 
-// --- Address Lookup (US Census Geocoder - free, no key needed) ---
+// --- Address Lookup (Geocodio - 2,500 free/day) ---
 export async function lookupAddress(address: string) {
+  const geocodioKey = process.env.GEOCODIO_API_KEY;
+
+  // Primary: Geocodio (2,500 free lookups/day, US + Canada)
+  if (geocodioKey) {
+    try {
+      const res = await fetch(
+        `https://api.geocod.io/v1.7/geocode?q=${encodeURIComponent(address)}&api_key=${geocodioKey}&fields=census,acs-economics`,
+        { signal: AbortSignal.timeout(10000) }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        const results = (data.results || []).map((r: Record<string, unknown>) => ({
+          formatted_address: r.formatted_address,
+          accuracy: r.accuracy,
+          accuracy_type: r.accuracy_type,
+          location: r.location,
+          address_components: r.address_components,
+          county: (r.address_components as Record<string, unknown>)?.county,
+          state: (r.address_components as Record<string, unknown>)?.state,
+          census: (r.fields as Record<string, unknown>)?.census,
+        }));
+        return { results, source: 'Geocodio' };
+      }
+    } catch { /* fallback */ }
+  }
+
+  // Fallback: US Census Geocoder (free, no key)
   try {
     const res = await fetch(
       `https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=${encodeURIComponent(address)}&benchmark=Public_AR_Current&format=json`,
@@ -61,14 +88,13 @@ export async function lookupAddress(address: string) {
           matched_address: m.matchedAddress,
           coordinates: m.coordinates,
           address_components: m.addressComponents,
-          tiger_line: m.tigerLine,
         })),
         source: 'US Census Geocoder',
       };
     }
-  } catch { /* fallback */ }
+  } catch { /* offline */ }
 
-  return { results: [], source: 'US Census Geocoder (offline)' };
+  return { results: [], source: 'Address lookup unavailable' };
 }
 
 // --- Phone Lookup (NumVerify - free tier: 100 req/month) ---

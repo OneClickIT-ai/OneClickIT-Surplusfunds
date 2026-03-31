@@ -14,7 +14,8 @@
       "Bash(vercel --prod --yes)",
       "Bash(git rm:*)",
       "Bash(npx tsc:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(printf \"ritacsolutions@gmail.com\")"
     ]
   }
 }

@@ -1,13 +1,13 @@
 'use client';
 import { useState } from 'react';
 import { useSession, signIn } from 'next-auth/react';
-import { Search, Users, MapPin, Phone, Mail, Lock } from 'lucide-react';
+import { Search, Users, MapPin, Phone, Mail, Lock, AtSign } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 
-type ToolType = 'people' | 'address' | 'phone' | 'email';
+type ToolType = 'people' | 'username' | 'address' | 'phone' | 'email';
 
 interface SearchResult {
   query: string;
@@ -18,6 +18,7 @@ interface SearchResult {
 
 const TOOLS = [
   { id: 'people' as ToolType, name: 'People Search', icon: Users, placeholder: 'Enter full name (e.g. John Smith)' },
+  { id: 'username' as ToolType, name: 'Username Search', icon: AtSign, placeholder: 'Enter username (e.g. johndoe123)' },
   { id: 'address' as ToolType, name: 'Address Lookup', icon: MapPin, placeholder: 'Enter address (e.g. 123 Main St, City, ST)' },
   { id: 'phone' as ToolType, name: 'Phone Checker', icon: Phone, placeholder: 'Enter phone number (e.g. 555-123-4567)' },
   { id: 'email' as ToolType, name: 'Email Verify', icon: Mail, placeholder: 'Enter email address' },

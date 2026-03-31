@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSession, signOut } from 'next-auth/react';
-import { Search, LayoutDashboard, Settings, LogOut, LogIn, Shield, CreditCard } from 'lucide-react';
+import { Search, LayoutDashboard, Settings, LogOut, LogIn, Shield, CreditCard, Download } from 'lucide-react';
 
 export default function Header() {
   const { data: session } = useSession();
@@ -52,6 +52,14 @@ export default function Header() {
               >
                 <Shield className="h-4 w-4" />
                 <span className="hidden sm:block">OSINT</span>
+              </Link>
+
+              <Link
+                href="/export"
+                className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+              >
+                <Download className="h-4 w-4" />
+                <span className="hidden sm:block">Export</span>
               </Link>
 
               <Link

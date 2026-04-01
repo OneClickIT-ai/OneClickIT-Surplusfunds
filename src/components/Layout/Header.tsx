@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSession, signOut } from 'next-auth/react';
-import { Search, LayoutDashboard, Settings, LogOut, LogIn, Shield, Wrench, ClipboardList, BookOpen, Landmark } from 'lucide-react';
+import { Search, LayoutDashboard, Settings, LogOut, LogIn, Shield, Wrench, ClipboardList, BookOpen, Landmark, ExternalLink } from 'lucide-react';
 
 export default function Header() {
   const { data: session } = useSession();
@@ -58,6 +58,14 @@ export default function Header() {
           >
             <Landmark className="h-4 w-4" />
             <span className="hidden sm:block">Unclaimed</span>
+          </Link>
+
+          <Link
+            href="/lookup"
+            className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-orange-600 hover:bg-orange-50 hover:text-orange-700"
+          >
+            <ExternalLink className="h-4 w-4" />
+            <span className="hidden sm:block">Lookup</span>
           </Link>
 
           <Link

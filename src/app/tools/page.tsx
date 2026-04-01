@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { FileText, Calculator, Scale, ClipboardList, Shield, Download, Search, BookOpen, Globe, Landmark } from 'lucide-react';
+import { FileText, Calculator, Scale, ClipboardList, Shield, Download, Search, BookOpen, Globe, Landmark, ExternalLink } from 'lucide-react';
 
 const tools = [
   {
@@ -52,11 +52,18 @@ const tools = [
     color: 'purple',
   },
   {
+    name: 'Third-Party Lookup',
+    desc: '150+ search tools across 14 categories — person, phone, email, court, financial, and more.',
+    href: '/lookup',
+    icon: ExternalLink,
+    color: 'orange',
+  },
+  {
     name: 'Google Dork Search',
     desc: 'Generate targeted Google searches to find surplus funds lists by state.',
     href: '/dorks',
     icon: Globe,
-    color: 'orange',
+    color: 'green',
   },
   {
     name: 'Learning Center',

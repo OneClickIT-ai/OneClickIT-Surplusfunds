@@ -19,6 +19,11 @@ model County {
   notes         String?
   rulesText     String?     @map("rules_text") @db.Text
   claimDeadline String?     @map("claim_deadline")
+  filingOffice  String?     @map("filing_office")
+  officePhone   String?     @map("office_phone")
+  officeEmail   String?     @map("office_email")
+  officeAddr    String?     @map("office_addr")
+  assessorUrl   String?     @map("assessor_url")
   lastScraped   DateTime?   @map("last_scraped")
   createdAt     DateTime    @default(now()) @map("created_at")
   updatedAt     DateTime    @updatedAt @map("updated_at")
@@ -77,6 +82,44 @@ model Alert {
 
   @@unique([userId, countyId])
   @@map("alerts")
+}
+
+model Claim {
+  id          String          @id @default(cuid())
+  countyName  String          @map("county_name")
+  state       String          @db.VarChar(2)
+  ownerName   String          @map("owner_name")
+  propertyAddr String?        @map("property_addr")
+  parcelId    String?         @map("parcel_id")
+  amount      Float?
+  status      String          @default("research") // research, contacted, docs_gathering, filed, approved, paid, denied
+  priority    String          @default("medium")    // low, medium, high
+  notes       String?         @db.Text
+  filedDate   DateTime?       @map("filed_date")
+  deadlineDate DateTime?      @map("deadline_date")
+  paidDate    DateTime?       @map("paid_date")
+  paidAmount  Float?          @map("paid_amount")
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+
+  activities  ClaimActivity[]
+
+  @@index([status])
+  @@index([state])
+  @@map("claims")
+}
+
+model ClaimActivity {
+  id        String   @id @default(cuid())
+  claimId   String   @map("claim_id")
+  type      String   // note, status_change, document, contact, filing
+  message   String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  claim     Claim    @relation(fields: [claimId], references: [id], onDelete: Cascade)
+
+  @@index([claimId])
+  @@map("claim_activities")
 }
 
 model Account {

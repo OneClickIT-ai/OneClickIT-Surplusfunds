@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSession, signOut } from 'next-auth/react';
-import { Search, LayoutDashboard, Settings, LogOut, LogIn, Shield, CreditCard, Download } from 'lucide-react';
+import { Search, LayoutDashboard, Settings, LogOut, LogIn, Shield, CreditCard, Wrench, ClipboardList } from 'lucide-react';
 
 export default function Header() {
   const { data: session } = useSession();
@@ -45,11 +45,19 @@ export default function Header() {
           </Link>
 
           <Link
-            href="/export"
+            href="/claims"
+            className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+          >
+            <ClipboardList className="h-4 w-4" />
+            <span className="hidden sm:block">Claims</span>
+          </Link>
+
+          <Link
+            href="/tools"
             className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
           >
-            <Download className="h-4 w-4" />
-            <span className="hidden sm:block">Export</span>
+            <Wrench className="h-4 w-4" />
+            <span className="hidden sm:block">Tools</span>
           </Link>
 
           <Link

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { FileText, Calculator, Scale, ClipboardList, Shield, Download, Search, BookOpen, Globe } from 'lucide-react';
+import { FileText, Calculator, Scale, ClipboardList, Shield, Download, Search, BookOpen, Globe, Landmark } from 'lucide-react';
 
 const tools = [
   {
@@ -43,6 +43,13 @@ const tools = [
     href: '/directory',
     icon: Search,
     color: 'blue',
+  },
+  {
+    name: 'Unclaimed Property',
+    desc: 'Search all 50 state unclaimed property programs — bank accounts, insurance, wages, and more.',
+    href: '/unclaimed',
+    icon: Landmark,
+    color: 'purple',
   },
   {
     name: 'Google Dork Search',

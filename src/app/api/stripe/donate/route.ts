@@ -3,7 +3,6 @@ import { ok, err } from '@/lib/api-utils';
 
 export const dynamic = 'force-dynamic';
 
-const DONATION_AMOUNTS = [5, 10, 25, 50, 100];
 
 export async function POST(request: NextRequest) {
   if (!process.env.STRIPE_SECRET_KEY) {

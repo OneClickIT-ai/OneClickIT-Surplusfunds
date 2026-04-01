@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSession, signOut } from 'next-auth/react';
-import { Search, LayoutDashboard, Settings, LogOut, LogIn, Shield, Wrench, ClipboardList, BookOpen } from 'lucide-react';
+import { Search, LayoutDashboard, Settings, LogOut, LogIn, Shield, Wrench, ClipboardList, BookOpen, Landmark } from 'lucide-react';
 
 export default function Header() {
   const { data: session } = useSession();
@@ -50,6 +50,14 @@ export default function Header() {
           >
             <ClipboardList className="h-4 w-4" />
             <span className="hidden sm:block">Claims</span>
+          </Link>
+
+          <Link
+            href="/unclaimed"
+            className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 hover:text-purple-700"
+          >
+            <Landmark className="h-4 w-4" />
+            <span className="hidden sm:block">Unclaimed</span>
           </Link>
 
           <Link

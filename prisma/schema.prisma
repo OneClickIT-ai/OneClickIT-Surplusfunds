@@ -122,6 +122,28 @@ model ClaimActivity {
   @@map("claim_activities")
 }
 
+model UnclaimedProperty {
+  id            String   @id @default(cuid())
+  state         String   @db.VarChar(2)
+  ownerName     String   @map("owner_name")
+  propertyType  String   @map("property_type")   // cash, securities, safe_deposit, insurance, wages, utility, other
+  reportedAmount Float?  @map("reported_amount")
+  holderName    String?  @map("holder_name")      // bank, company, etc. that reported it
+  address       String?
+  city          String?
+  zip           String?
+  reportedDate  String?  @map("reported_date")
+  sourceUrl     String?  @map("source_url")
+  externalId    String?  @map("external_id")      // ID from state portal
+  lastScraped   DateTime @default(now()) @map("last_scraped")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([state])
+  @@index([ownerName])
+  @@index([state, ownerName])
+  @@map("unclaimed_properties")
+}
+
 model Account {
   id                String  @id @default(cuid())
   userId            String  @map("user_id")

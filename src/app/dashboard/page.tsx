@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
-import { Bell, Bookmark, MapPin, Search, Download, Shield, CreditCard, ArrowRight, Wrench, Globe, FileText } from 'lucide-react';
+import { Bell, Bookmark, MapPin, Search, Download, Shield, CreditCard, ArrowRight, Wrench, Globe, FileText, Calculator, ClipboardList, FileDown } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 
@@ -132,6 +132,15 @@ export default async function DashboardPage() {
               </Link>
               <Link href="/unclaimed" className="flex items-center gap-2 rounded-lg p-2.5 text-sm text-gray-700 hover:bg-gray-50">
                 <FileText className="h-4 w-4 text-gray-400" /> Unclaimed Property by State
+              </Link>
+              <Link href="/claims" className="flex items-center gap-2 rounded-lg p-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                <ClipboardList className="h-4 w-4 text-gray-400" /> Claims Tracker
+              </Link>
+              <Link href="/templates" className="flex items-center gap-2 rounded-lg p-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                <FileDown className="h-4 w-4 text-gray-400" /> Claim Templates
+              </Link>
+              <Link href="/calculator" className="flex items-center gap-2 rounded-lg p-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                <Calculator className="h-4 w-4 text-gray-400" /> Calculator
               </Link>
               <Link href="/tools" className="flex items-center gap-2 rounded-lg p-2.5 text-sm text-gray-700 hover:bg-gray-50">
                 <Wrench className="h-4 w-4 text-gray-400" /> All Tools

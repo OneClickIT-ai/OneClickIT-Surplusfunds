@@ -1,19 +1,3 @@
-import { getServerSession } from 'next-auth';
-import { authOptions } from './auth';
-import { err } from './api-utils';
-
-/**
- * Middleware to check if user has Pro access for OSINT tools.
- * Returns null if authorized, or an error Response if not.
- */
-export async function requirePro() {
-  const session = await getServerSession(authOptions);
-  if (!session) return err('Unauthorized', 401);
-  if (session.user.role !== 'pro' && session.user.role !== 'admin') {
-    return err('Pro subscription required for OSINT tools', 403);
-  }
-  return null;
-}
 
 // --- People Search (Abstract API + fallback) ---
 export async function searchPeople(name: string) {

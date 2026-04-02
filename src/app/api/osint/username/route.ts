@@ -1,7 +1,10 @@
 import { NextRequest } from 'next/server';
 import { ok, handleError } from '@/lib/api-utils';
+import { rateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
+  const limited = rateLimit(request);
+  if (limited) return limited;
   try {
     const { query } = await request.json();
     if (!query) return ok({ query, tool: 'username', results: [], source: 'No query' });

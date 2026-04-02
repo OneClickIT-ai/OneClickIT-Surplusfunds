@@ -63,6 +63,7 @@ model User {
   createdAt     DateTime  @default(now()) @map("created_at")
 
   alerts        Alert[]
+  claims        Claim[]
   accounts      Account[]
   sessions      Session[]
 
@@ -86,6 +87,7 @@ model Alert {
 
 model Claim {
   id          String          @id @default(cuid())
+  userId      String?         @map("user_id")
   countyName  String          @map("county_name")
   state       String          @db.VarChar(2)
   ownerName   String          @map("owner_name")
@@ -102,8 +104,10 @@ model Claim {
   createdAt   DateTime        @default(now()) @map("created_at")
   updatedAt   DateTime        @updatedAt @map("updated_at")
 
+  user        User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
   activities  ClaimActivity[]
 
+  @@index([userId])
   @@index([status])
   @@index([state])
   @@map("claims")

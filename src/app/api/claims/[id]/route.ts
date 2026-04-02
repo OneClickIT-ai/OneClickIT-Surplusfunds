@@ -1,19 +1,33 @@
 import { NextRequest } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { ok, err, handleError } from '@/lib/api-utils';
 
 export const dynamic = 'force-dynamic';
 
+async function ownsClaim(claimId: string, userId: string) {
+  const claim = await prisma.claim.findUnique({ where: { id: claimId } });
+  if (!claim) return { claim: null, error: err('Claim not found', 404) };
+  if (claim.userId && claim.userId !== userId) return { claim: null, error: err('Not authorized', 403) };
+  return { claim, error: null };
+}
+
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session) return err('Sign in to view claims', 401);
+
     const { id } = await params;
-    const claim = await prisma.claim.findUnique({
+    const { claim, error } = await ownsClaim(id, session.user.id);
+    if (error) return error;
+
+    const full = await prisma.claim.findUnique({
       where: { id },
       include: { activities: { orderBy: { createdAt: 'desc' } } },
     });
 
-    if (!claim) return err('Claim not found', 404);
-    return ok(claim);
+    return ok(full ?? claim);
   } catch (error) {
     return handleError(error);
   }
@@ -21,12 +35,15 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session) return err('Sign in to update claims', 401);
+
     const { id } = await params;
+    const { claim: existing, error: authErr } = await ownsClaim(id, session.user.id);
+    if (authErr) return authErr;
+
     const body = await request.json();
     const { status, notes, priority, amount, filedDate, paidDate, paidAmount, deadlineDate } = body;
-
-    const existing = await prisma.claim.findUnique({ where: { id } });
-    if (!existing) return err('Claim not found', 404);
 
     const data: Record<string, unknown> = {};
     if (status !== undefined) data.status = status;
@@ -38,8 +55,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (paidAmount !== undefined) data.paidAmount = paidAmount ? parseFloat(paidAmount) : null;
     if (deadlineDate !== undefined) data.deadlineDate = deadlineDate ? new Date(deadlineDate) : null;
 
-    // Log status change as activity
-    if (status && status !== existing.status) {
+    if (status && existing && status !== existing.status) {
       await prisma.claimActivity.create({
         data: {
           claimId: id,
@@ -63,7 +79,13 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
 export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session) return err('Sign in to delete claims', 401);
+
     const { id } = await params;
+    const { error: authErr } = await ownsClaim(id, session.user.id);
+    if (authErr) return authErr;
+
     await prisma.claim.delete({ where: { id } });
     return ok({ deleted: true });
   } catch (error) {

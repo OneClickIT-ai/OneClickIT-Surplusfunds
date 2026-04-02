@@ -4,6 +4,22 @@ import { prisma } from '@/lib/prisma';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+async function getUserIdFromCustomer(stripe: InstanceType<typeof import('stripe').default>, customerId: string): Promise<string | null> {
+  try {
+    const customer = await stripe.customers.retrieve(customerId);
+    if (customer.deleted) return null;
+    // Prefer metadata userId, fall back to email lookup
+    if (customer.metadata?.userId) return customer.metadata.userId;
+    if (customer.email) {
+      const user = await prisma.user.findUnique({ where: { email: customer.email } });
+      return user?.id || null;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export async function POST(request: NextRequest) {
   if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
     return NextResponse.json({ error: 'Stripe not configured' }, { status: 503 });
@@ -25,7 +41,6 @@ export async function POST(request: NextRequest) {
     const event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET);
 
     switch (event.type) {
-      // New subscription
       case 'checkout.session.completed': {
         const session = event.data.object;
         const userId = session.metadata?.userId;
@@ -39,46 +54,40 @@ export async function POST(request: NextRequest) {
         break;
       }
 
-      // Subscription renewed successfully
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object;
-        const customerId = invoice.customer as string;
-        const customer = await stripe.customers.retrieve(customerId);
-        if (customer && !customer.deleted && customer.email) {
-          await prisma.user.updateMany({
-            where: { email: customer.email },
+        const userId = await getUserIdFromCustomer(stripe, invoice.customer as string);
+        if (userId) {
+          await prisma.user.update({
+            where: { id: userId },
             data: { role: 'pro' },
           });
         }
         break;
       }
 
-      // Payment failed — downgrade after grace period
       case 'invoice.payment_failed': {
         const failedInvoice = event.data.object;
-        const failedCustomerId = failedInvoice.customer as string;
-        const failedCustomer = await stripe.customers.retrieve(failedCustomerId);
-        if (failedCustomer && !failedCustomer.deleted && failedCustomer.email) {
-          await prisma.user.updateMany({
-            where: { email: failedCustomer.email },
+        const userId = await getUserIdFromCustomer(stripe, failedInvoice.customer as string);
+        if (userId) {
+          await prisma.user.update({
+            where: { id: userId },
             data: { role: 'user' },
           });
-          console.log(`Payment failed for ${failedCustomer.email}, downgraded`);
+          console.log(`Payment failed for user ${userId}, downgraded`);
         }
         break;
       }
 
-      // Subscription cancelled
       case 'customer.subscription.deleted': {
         const sub = event.data.object;
-        const subCustomerId = sub.customer as string;
-        const subCustomer = await stripe.customers.retrieve(subCustomerId);
-        if (subCustomer && !subCustomer.deleted && subCustomer.email) {
-          await prisma.user.updateMany({
-            where: { email: subCustomer.email },
+        const userId = await getUserIdFromCustomer(stripe, sub.customer as string);
+        if (userId) {
+          await prisma.user.update({
+            where: { id: userId },
             data: { role: 'user' },
           });
-          console.log(`Subscription cancelled for ${subCustomer.email}`);
+          console.log(`Subscription cancelled for user ${userId}`);
         }
         break;
       }

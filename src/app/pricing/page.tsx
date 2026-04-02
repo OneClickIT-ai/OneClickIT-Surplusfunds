@@ -1,6 +1,6 @@
 'use client';
 import { useSession, signIn } from 'next-auth/react';
-import { Check, Zap, Shield, Search, Download, Bell, Users } from 'lucide-react';
+import { Check, Shield, Search, Download, Bell } from 'lucide-react';
 import Image from 'next/image';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
@@ -43,14 +43,14 @@ const FREE_FEATURES = [
   'View basic surplus listings',
   '5 county detail views per day',
   'State filter & search',
+  'OSINT people search tools',
+  'Address verification & lookup',
+  'Phone & email checker',
 ];
 
 const PRO_FEATURES = [
   'Everything in Free, plus:',
   'Full vetted & sorted surplus data',
-  'OSINT people search tools',
-  'Address verification & lookup',
-  'Phone & email checker',
   'CSV export of filtered results',
   'Priority alert notifications',
   'Unlimited county detail views',
@@ -91,7 +91,7 @@ export default function PricingPage() {
           Unlock the Full Platform
         </h1>
         <p className="mt-3 text-lg text-gray-500">
-          Free basic access. Upgrade for vetted data, OSINT tools, and faster claims.
+          Free basic access with OSINT tools. Upgrade for vetted data, CSV exports, and faster claims.
         </p>
       </div>
 
@@ -123,7 +123,7 @@ export default function PricingPage() {
           </div>
           <div className="mb-4">
             <h2 className="text-xl font-bold text-gray-900">Pro Access</h2>
-            <p className="text-sm text-gray-500 mt-1">Full platform + OSINT tools</p>
+            <p className="text-sm text-gray-500 mt-1">Full platform + exports &amp; unlimited access</p>
           </div>
           <ul className="space-y-3 mb-6">
             {PRO_FEATURES.map(f => (
@@ -134,16 +134,14 @@ export default function PricingPage() {
             ))}
           </ul>
 
-          {/* OSINT tools preview */}
+          {/* Pro tools preview */}
           <div className="mb-6 rounded-lg bg-gray-50 p-4">
-            <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wide">OSINT Tools Included</p>
+            <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wide">Pro Exclusive Features</p>
             <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
-              <span className="flex items-center gap-1"><Users className="h-3 w-3" /> People Search</span>
-              <span className="flex items-center gap-1"><Search className="h-3 w-3" /> Address Lookup</span>
-              <span className="flex items-center gap-1"><Zap className="h-3 w-3" /> Phone Checker</span>
-              <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> Email Verify</span>
               <span className="flex items-center gap-1"><Download className="h-3 w-3" /> CSV Export</span>
-              <span className="flex items-center gap-1"><Bell className="h-3 w-3" /> Smart Alerts</span>
+              <span className="flex items-center gap-1"><Bell className="h-3 w-3" /> Priority Alerts</span>
+              <span className="flex items-center gap-1"><Search className="h-3 w-3" /> Unlimited Views</span>
+              <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> Vetted Data</span>
             </div>
           </div>
         </Card>

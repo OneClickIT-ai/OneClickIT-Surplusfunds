@@ -37,8 +37,8 @@ export default async function HomePage() {
     <div>
       {/* Launch banner */}
       <div className="bg-green-600 px-4 py-2.5 text-center text-sm font-medium text-white">
-        Official Launch: April 7, 2026 &mdash;{' '}
-        <a href="/auth/signup" className="underline hover:text-green-100">Sign up now for early access</a>
+        Now Live &mdash; Start finding surplus funds today.{' '}
+        <a href="/auth/signup" className="underline hover:text-green-100">Create your free account</a>
       </div>
 
       {/* Hero */}

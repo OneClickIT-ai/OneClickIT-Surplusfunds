@@ -1,4 +1,6 @@
 import { NextRequest } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { ok, err, handleError } from '@/lib/api-utils';
 
@@ -6,11 +8,14 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session) return err('Sign in to view your claims', 401);
+
     const { searchParams } = request.nextUrl;
     const status = searchParams.get('status');
     const state = searchParams.get('state');
 
-    const where: Record<string, unknown> = {};
+    const where: Record<string, unknown> = { userId: session.user.id };
     if (status) where.status = status;
     if (state) where.state = state;
 
@@ -28,6 +33,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session) return err('Sign in to create claims', 401);
+
     const body = await request.json();
     const { countyName, state, ownerName, propertyAddr, parcelId, amount, deadlineDate, notes, priority } = body;
 
@@ -37,6 +45,7 @@ export async function POST(request: NextRequest) {
 
     const claim = await prisma.claim.create({
       data: {
+        userId: session.user.id,
         countyName,
         state,
         ownerName,

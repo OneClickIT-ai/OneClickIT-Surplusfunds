@@ -89,7 +89,9 @@ export default function OsintPage() {
       <Card className="mb-6">
         <div className="flex gap-3">
           <div className="flex-1">
+            <label htmlFor="osint-search" className="sr-only">{tool.placeholder}</label>
             <Input
+              id="osint-search"
               placeholder={tool.placeholder}
               value={query}
               onChange={e => setQuery(e.target.value)}

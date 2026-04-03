@@ -1,7 +1,8 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { Plus, ArrowRight, AlertTriangle, FileSearch } from 'lucide-react';
+import { Plus, ArrowRight, AlertTriangle, FileSearch, LogIn } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Select from '@/components/ui/Select';
@@ -38,6 +39,7 @@ const STATUS_OPTIONS = [
 ];
 
 export default function ClaimsPage() {
+  const { data: session, status: authStatus } = useSession();
   const [claims, setClaims] = useState<Claim[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('');
@@ -49,6 +51,7 @@ export default function ClaimsPage() {
   const [saving, setSaving] = useState(false);
 
   const fetchClaims = useCallback(async () => {
+    if (!session) { setLoading(false); return; }
     const params = new URLSearchParams();
     if (filterStatus) params.set('status', filterStatus);
     if (filterState) params.set('state', filterState);
@@ -56,7 +59,7 @@ export default function ClaimsPage() {
     const data = await res.json();
     if (res.ok) setClaims(data.data);
     setLoading(false);
-  }, [filterStatus, filterState]);
+  }, [filterStatus, filterState, session]);
 
   useEffect(() => { fetchClaims(); }, [fetchClaims]);
 
@@ -179,6 +182,18 @@ export default function ClaimsPage() {
       {/* Claims table */}
       {loading ? (
         <div className="py-12 text-center text-sm text-gray-400">Loading claims...</div>
+      ) : !session && authStatus !== 'loading' ? (
+        <Card className="py-12 text-center">
+          <LogIn className="mx-auto mb-3 h-8 w-8 text-gray-300" />
+          <p className="text-sm text-gray-500 mb-3">Sign in to track and manage your surplus funds claims.</p>
+          <Link
+            href="/auth/signin"
+            className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+          >
+            <LogIn className="h-4 w-4" />
+            Sign in to get started
+          </Link>
+        </Card>
       ) : claims.length === 0 ? (
         <Card className="py-12 text-center">
           <FileSearch className="mx-auto mb-3 h-8 w-8 text-gray-300" />

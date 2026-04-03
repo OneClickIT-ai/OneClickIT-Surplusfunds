@@ -18,12 +18,12 @@ export const alertSchema = z.object({
 });
 
 export const searchSchema = z.object({
-  q: z.string().max(200).optional(),
-  state: z.string().length(2).optional(),
-  minPop: z.coerce.number().int().nonnegative().optional(),
-  maxPop: z.coerce.number().int().positive().optional(),
-  page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().min(1).max(100).default(20),
+  q: z.string().max(200).nullish().transform(v => v ?? undefined),
+  state: z.string().length(2).nullish().transform(v => v ?? undefined),
+  minPop: z.coerce.number().int().nonnegative().nullish().transform(v => v ?? undefined),
+  maxPop: z.coerce.number().int().positive().nullish().transform(v => v ?? undefined),
+  page: z.coerce.number().int().positive().nullish().default(1).transform(v => v ?? 1),
+  limit: z.coerce.number().int().min(1).max(100).nullish().default(20).transform(v => v ?? 20),
 });
 
 export type CountyInput = z.infer<typeof countySchema>;

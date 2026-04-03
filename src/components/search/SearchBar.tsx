@@ -20,9 +20,11 @@ export default function SearchBar({ placeholder = 'Search counties by name or st
   };
 
   return (
-    <form onSubmit={handleSubmit} className="relative w-full">
-      <Search className={`absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 ${size === 'large' ? 'h-5 w-5' : 'h-4 w-4'}`} />
+    <form onSubmit={handleSubmit} className="relative w-full" role="search" aria-label="Search counties">
+      <Search className={`absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 ${size === 'large' ? 'h-5 w-5' : 'h-4 w-4'}`} aria-hidden="true" />
+      <label htmlFor="county-search" className="sr-only">Search counties by name or state</label>
       <input
+        id="county-search"
         type="text"
         value={query}
         onChange={e => setQuery(e.target.value)}

@@ -142,8 +142,8 @@ export default async function HomePage() {
                   icon: <Shield className="h-5 w-5" />,
                   color: 'purple',
                   title: 'Identify the Rightful Claimant',
-                  desc: 'Use our Pro OSINT tools to locate the former property owner or their heirs. Verify addresses, phone numbers, and public records to confirm identity and establish contact.',
-                  tag: 'Pro feature',
+                  desc: 'Use our free OSINT tools to locate the former property owner or their heirs. Verify addresses, phone numbers, and public records to confirm identity and establish contact.',
+                  tag: 'Free tool',
                 },
                 {
                   step: 6,
@@ -236,15 +236,15 @@ export default async function HomePage() {
 
         {counties.length > 0 ? (
           <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
-            <table className="min-w-full divide-y divide-gray-200">
+            <table className="min-w-full divide-y divide-gray-200" aria-label="Surplus funds county directory">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">County</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">State</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Population</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Source</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Deadline</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">List</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">County</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">State</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Population</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Source</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Deadline</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">List</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">

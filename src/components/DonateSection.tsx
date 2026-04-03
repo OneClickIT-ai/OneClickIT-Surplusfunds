@@ -65,6 +65,7 @@ export default function DonateSection() {
               min="1"
               max="1000"
               placeholder="Other"
+              aria-label="Custom donation amount"
               value={custom}
               onChange={(e) => setCustom(e.target.value)}
               className="w-24 rounded-lg border border-gray-200 py-2 pl-7 pr-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"

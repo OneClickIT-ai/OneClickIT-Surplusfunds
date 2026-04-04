@@ -67,7 +67,10 @@ export default function SignUpPage() {
         </p>
 
         <p className="mt-4 text-center text-xs text-gray-400">
-          By creating an account you agree that surplus funds data is public information.
+          By creating an account you agree to our{' '}
+          <Link href="/terms" className="underline hover:text-gray-600">Terms of Service</Link>{' '}
+          and{' '}
+          <Link href="/privacy" className="underline hover:text-gray-600">Privacy Policy</Link>.
           No legal claims are made on your behalf.
         </p>
       </div>

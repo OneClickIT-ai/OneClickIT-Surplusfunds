@@ -51,11 +51,11 @@ export default async function HomePage() {
             {stats.withUrls} counties with online lists across {stats.stateCount} states
           </div>
           <h1 className="mb-4 text-3xl font-bold text-white sm:text-5xl">
-            Find Surplus Funds<br />from US Counties
+            Find Surplus Funds and<br />Unclaimed Money from US Counties
           </h1>
           <p className="mb-8 text-lg text-blue-100">
-            Search publicly available tax sale proceeds, foreclosure overages, and unclaimed
-            property lists from county treasurers and clerks nationwide.
+            Search tax sale surplus, foreclosure overages, and unclaimed property lists from
+            county treasurers and clerks nationwide &mdash; all in one searchable directory.
           </p>
           <div className="mx-auto max-w-xl">
             <SearchBar size="large" />
@@ -88,6 +88,15 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Freemium disclaimer */}
+      <section className="bg-white px-4 pb-2">
+        <p className="mx-auto max-w-2xl text-center text-xs text-gray-400">
+          The core county directory is free to browse forever. Pro plans unlock CSV exports,
+          vetted data, and advanced tracking for professional surplus-funds businesses.{' '}
+          <Link href="/pricing" className="text-blue-500 hover:underline">View pricing</Link>
+        </p>
       </section>
 
       {/* How to Claim Surplus Funds — 8 steps */}

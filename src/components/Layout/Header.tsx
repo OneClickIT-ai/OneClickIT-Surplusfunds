@@ -3,16 +3,16 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSession, signOut } from 'next-auth/react';
-import { Search, LayoutDashboard, Settings, LogOut, LogIn, Shield, Wrench, ClipboardList, BookOpen, Landmark, ExternalLink, Menu, X } from 'lucide-react';
+import { Search, LayoutDashboard, Settings, LogOut, LogIn, Shield, Wrench, ClipboardList, BookOpen, Landmark, DollarSign, Menu, X } from 'lucide-react';
 
 const NAV_LINKS = [
   { href: '/directory', label: 'Directory', icon: Search, color: 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' },
   { href: '/osint', label: 'OSINT', icon: Shield, color: 'text-green-600 hover:bg-green-50 hover:text-green-700' },
   { href: '/claims', label: 'Claims', icon: ClipboardList, color: 'text-blue-600 hover:bg-blue-50 hover:text-blue-700' },
   { href: '/unclaimed', label: 'Unclaimed', icon: Landmark, color: 'text-purple-600 hover:bg-purple-50 hover:text-purple-700' },
-  { href: '/lookup', label: 'Lookup', icon: ExternalLink, color: 'text-orange-600 hover:bg-orange-50 hover:text-orange-700' },
   { href: '/tools', label: 'Tools', icon: Wrench, color: 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' },
   { href: '/learn', label: 'Learn', icon: BookOpen, color: 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' },
+  { href: '/pricing', label: 'Pricing', icon: DollarSign, color: 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' },
 ];
 
 export default function Header() {
@@ -102,7 +102,7 @@ export default function Header() {
                 className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700"
               >
                 <LogIn className="h-4 w-4" />
-                Sign up
+                Start free
               </Link>
             </div>
           )}

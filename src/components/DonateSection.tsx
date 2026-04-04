@@ -36,11 +36,12 @@ export default function DonateSection() {
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-pink-100">
           <Heart className="h-7 w-7 text-pink-500" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">Help Keep This Site Free</h2>
+        <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">Help Keep the Core Directory Free</h2>
         <p className="mt-3 text-gray-500">
-          SurplusClickIT is free for everyone — no paywalls, no hidden fees. Your donation helps
-          cover server costs, data updates, and new features so we can keep this resource available
-          to all.
+          SurplusClickIT keeps the core county directory free for everyone. Donations help cover
+          server costs and ongoing data updates so researchers and claimants can access public
+          records without barriers. Pro plans are available for professionals who need CSV exports,
+          vetted data, and advanced tools.
         </p>
 
         {/* Amount selector */}

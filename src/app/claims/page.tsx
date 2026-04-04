@@ -108,7 +108,7 @@ export default function ClaimsPage() {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Claim Tracker</h1>
-          <p className="text-sm text-gray-500">Track and manage your surplus funds claims pipeline</p>
+          <p className="text-sm text-gray-500">Keep all your surplus funds cases organized &mdash; add counties, owners, filing dates, and notes so nothing slips through the cracks.</p>
         </div>
         <Button onClick={() => setShowCreate(!showCreate)}>
           <Plus className="mr-1.5 h-4 w-4" />

@@ -19,7 +19,7 @@ export default function ExportPage() {
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Export Data</h1>
-        <p className="text-sm text-gray-500">Download surplus funds data as CSV</p>
+        <p className="text-sm text-gray-500">CSV exports are available on Pro plans so you can analyze county and funds data in Excel, Google Sheets, or your own CRM.</p>
       </div>
 
       {/* Filter */}

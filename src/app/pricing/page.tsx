@@ -39,13 +39,13 @@ const PLANS = [
 ];
 
 const FREE_FEATURES = [
-  'Browse 50+ county directory',
-  'View basic surplus listings',
-  '5 county detail views per day',
-  'State filter & search',
-  'OSINT people search tools',
-  'Address verification & lookup',
-  'Phone & email checker',
+  'Browse 200+ county directory',
+  'State filter & keyword search',
+  'OSINT people, address, phone & email lookup',
+  'Third-party lookup library (150+ tools)',
+  'Unclaimed property search (all 50 states)',
+  'Claims tracker (limited)',
+  'Learning center, templates & calculator',
 ];
 
 const PRO_FEATURES = [
@@ -88,10 +88,11 @@ export default function PricingPage() {
           <Image src="/surplusfunds_favicon.png" alt="" width={48} height={48} className="h-12 w-12" />
         </div>
         <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">
-          Unlock the Full Platform
+          Start Free. Upgrade When You&apos;re Ready to Scale.
         </h1>
-        <p className="mt-3 text-lg text-gray-500">
-          Free basic access with OSINT tools. Upgrade for vetted data, CSV exports, and faster claims.
+        <p className="mt-3 text-lg text-gray-500 max-w-2xl mx-auto">
+          Browse the county directory at no cost. Upgrade to Pro for CSV exports, advanced
+          tracking, and vetted data &mdash; from $1 to get started.
         </p>
       </div>
 
@@ -181,8 +182,37 @@ export default function PricingPage() {
         ))}
       </div>
 
-      {/* FAQ / Trust */}
-      <div className="mt-12 text-center text-sm text-gray-400">
+      {/* ROI callout */}
+      <div className="mt-12 rounded-xl bg-green-50 border border-green-200 p-6 text-center">
+        <p className="text-lg font-semibold text-green-900 mb-1">
+          One closed claim can pay for a year of Pro.
+        </p>
+        <p className="text-sm text-green-700">
+          Average surplus funds claims range from $1,000 to $50,000+. Pro tools help you find,
+          verify, and file faster &mdash; so you close more claims with less effort.
+        </p>
+      </div>
+
+      {/* FAQ */}
+      <div className="mt-12">
+        <h2 className="text-xl font-semibold text-gray-900 mb-6 text-center">Pricing FAQ</h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {[
+            { q: 'Can I cancel anytime?', a: 'Yes. Cancel your subscription at any time. Your access continues until the end of your billing period.' },
+            { q: 'Is the county directory really free?', a: 'Yes. Browsing the directory, searching counties, and using OSINT tools will always be free. Pro unlocks exports and advanced features.' },
+            { q: 'Do you offer refunds?', a: 'Refunds are handled case-by-case. Contact us within 7 days of purchase if you are unsatisfied.' },
+            { q: 'Will new counties be added?', a: 'Yes. We continuously add new counties and update existing data. Pro members get access to all future additions.' },
+          ].map(item => (
+            <div key={item.q} className="rounded-xl border border-gray-200 bg-white p-5">
+              <h3 className="font-medium text-gray-900 text-sm mb-1">{item.q}</h3>
+              <p className="text-sm text-gray-500">{item.a}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Trust */}
+      <div className="mt-10 text-center text-sm text-gray-400">
         <p>Secure payments via Stripe. Cancel anytime. No hidden fees.</p>
         <p className="mt-1">All data sourced from public county records. OSINT tools use publicly available information only.</p>
       </div>

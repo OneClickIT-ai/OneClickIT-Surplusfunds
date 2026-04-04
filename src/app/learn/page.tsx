@@ -308,8 +308,9 @@ export default function LearnPage() {
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-8 text-center">
         <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">Surplus Funds Recovery — Complete Guide</h1>
-        <p className="mt-2 text-gray-500">
-          A comprehensive syllabus for learning how to find, claim, and recover surplus funds from US counties
+        <p className="mt-2 text-gray-500 max-w-2xl mx-auto">
+          New to surplus funds? Start with the basics below. Already operating a business? Jump to
+          advanced guides on scaling, compliance, and automation.
         </p>
       </div>
 

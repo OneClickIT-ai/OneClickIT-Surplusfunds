@@ -63,7 +63,8 @@ export default function OsintPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">OSINT Tools</h1>
         <p className="text-sm text-gray-500">
-          Public records lookup for asset recovery and skip tracing
+          Use these OSINT (open-source intelligence) tools to verify owners, heirs, and contact
+          information. All searches use publicly available data &mdash; always confirm results with official records.
         </p>
       </div>
 

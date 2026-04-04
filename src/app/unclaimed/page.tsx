@@ -46,8 +46,10 @@ export default function UnclaimedPropertyPage() {
       <div className="mb-8 text-center">
         <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">Unclaimed Property by State</h1>
         <p className="mt-2 text-gray-500 max-w-2xl mx-auto">
-          Every US state holds unclaimed property — bank accounts, insurance payouts, wages, safe deposit boxes, and more.
-          Search your state&apos;s official portal to find money owed to you or your family.
+          Use these official state unclaimed property portals to search for forgotten bank accounts,
+          insurance payouts, wages, and other funds. This is separate from county surplus funds
+          (tax sale overages), which are listed in the{' '}
+          <Link href="/directory" className="text-blue-600 hover:underline">County Directory</Link>.
         </p>
       </div>
 

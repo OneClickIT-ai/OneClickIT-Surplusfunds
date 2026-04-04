@@ -7,8 +7,10 @@ export default function PartnersPage() {
       {/* Header */}
       <div className="mb-10 text-center">
         <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">Our Partners</h1>
-        <p className="mt-2 text-gray-500">
-          Trusted companies we recommend to help you succeed
+        <p className="mt-2 text-gray-500 max-w-2xl mx-auto">
+          SurplusClickIT is powered by OneClickIT.ai, our technology partner providing managed
+          infrastructure, custom integrations, and AI automations. Together we help surplus-funds
+          professionals scale reliably.
         </p>
       </div>
 

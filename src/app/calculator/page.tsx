@@ -45,7 +45,7 @@ export default function CalculatorPage() {
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Claim Amount Calculator</h1>
-        <p className="text-sm text-gray-500">Estimate costs, fees, and net recovery for surplus funds claims</p>
+        <p className="text-sm text-gray-500">Estimate your potential net proceeds from a surplus funds claim. Adjust your contingency rate, expected timeline, and costs to forecast what each case might be worth.</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">

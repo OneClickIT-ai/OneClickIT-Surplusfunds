@@ -47,10 +47,12 @@ export default function Footer() {
             <h3 className="mb-3 text-sm font-semibold text-gray-900">Company</h3>
             <ul className="space-y-2 text-sm text-gray-500">
               <li><Link href="/about" className="hover:text-gray-900">About</Link></li>
+              <li><Link href="/contact" className="hover:text-gray-900">Contact</Link></li>
+              <li><Link href="/faq" className="hover:text-gray-900">FAQ</Link></li>
               <li><Link href="/partners" className="hover:text-gray-900">Partners</Link></li>
               <li><Link href="/pricing" className="hover:text-gray-900">Pricing</Link></li>
-              <li><Link href="/tools" className="hover:text-gray-900">All Tools</Link></li>
-              <li><Link href="/dashboard" className="hover:text-gray-900">Dashboard</Link></li>
+              <li><Link href="/terms" className="hover:text-gray-900">Terms of Service</Link></li>
+              <li><Link href="/privacy" className="hover:text-gray-900">Privacy Policy</Link></li>
             </ul>
           </div>
         </div>

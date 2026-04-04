@@ -70,7 +70,7 @@ export default async function DirectoryPage({ searchParams }: PageProps) {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">County Directory</h1>
-        <p className="text-sm text-gray-500">{total} counties found</p>
+        <p className="text-sm text-gray-500">Browse surplus funds lists from {total} US counties. Filter by state, population, or keywords, then follow direct links to official county pages to verify amounts and claim procedures.</p>
       </div>
 
       <div className="mb-6">

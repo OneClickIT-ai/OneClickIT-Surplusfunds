@@ -3,32 +3,12 @@ import { FileText, Calculator, Scale, ClipboardList, Shield, Download, Search, B
 
 const tools = [
   {
-    name: 'Claim Tracker',
-    desc: 'Track and manage your surplus funds claims pipeline from research to payout.',
-    href: '/claims',
-    icon: ClipboardList,
+    name: 'County Directory',
+    desc: 'Browse 200+ counties with surplus funds lists, sources, and claim deadlines.',
+    href: '/directory',
+    icon: Search,
     color: 'blue',
-  },
-  {
-    name: 'State Requirements',
-    desc: 'View required documents, deadlines, statutes, and filing offices by state.',
-    href: '/requirements',
-    icon: Scale,
-    color: 'purple',
-  },
-  {
-    name: 'Claim Calculator',
-    desc: 'Estimate costs, agent fees, filing fees, and net recovery amounts.',
-    href: '/calculator',
-    icon: Calculator,
-    color: 'green',
-  },
-  {
-    name: 'Letter Templates',
-    desc: 'Professional claim letters, owner outreach, follow-ups, and assignment agreements.',
-    href: '/templates',
-    icon: FileText,
-    color: 'orange',
+    tier: 'Free',
   },
   {
     name: 'OSINT Tools',
@@ -36,13 +16,7 @@ const tools = [
     href: '/osint',
     icon: Shield,
     color: 'green',
-  },
-  {
-    name: 'County Directory',
-    desc: 'Browse all counties with surplus funds lists, sources, and claim deadlines.',
-    href: '/directory',
-    icon: Search,
-    color: 'blue',
+    tier: 'Free',
   },
   {
     name: 'Unclaimed Property',
@@ -50,6 +24,7 @@ const tools = [
     href: '/unclaimed',
     icon: Landmark,
     color: 'purple',
+    tier: 'Free',
   },
   {
     name: 'Third-Party Lookup',
@@ -57,6 +32,39 @@ const tools = [
     href: '/lookup',
     icon: ExternalLink,
     color: 'orange',
+    tier: 'Free',
+  },
+  {
+    name: 'Claim Tracker',
+    desc: 'Track and manage your surplus funds claims pipeline from research to payout.',
+    href: '/claims',
+    icon: ClipboardList,
+    color: 'blue',
+    tier: 'Free',
+  },
+  {
+    name: 'State Requirements',
+    desc: 'View required documents, deadlines, statutes, and filing offices by state.',
+    href: '/requirements',
+    icon: Scale,
+    color: 'purple',
+    tier: 'Free',
+  },
+  {
+    name: 'Claim Calculator',
+    desc: 'Estimate costs, agent fees, filing fees, and net recovery amounts.',
+    href: '/calculator',
+    icon: Calculator,
+    color: 'green',
+    tier: 'Free',
+  },
+  {
+    name: 'Letter Templates',
+    desc: 'Professional claim letters, owner outreach, follow-ups, and assignment agreements.',
+    href: '/templates',
+    icon: FileText,
+    color: 'orange',
+    tier: 'Free',
   },
   {
     name: 'Google Dork Search',
@@ -64,6 +72,7 @@ const tools = [
     href: '/dorks',
     icon: Globe,
     color: 'green',
+    tier: 'Free',
   },
   {
     name: 'Learning Center',
@@ -71,6 +80,7 @@ const tools = [
     href: '/learn',
     icon: BookOpen,
     color: 'blue',
+    tier: 'Free',
   },
   {
     name: 'Export Data',
@@ -78,6 +88,7 @@ const tools = [
     href: '/export',
     icon: Download,
     color: 'purple',
+    tier: 'Pro',
   },
 ];
 
@@ -92,9 +103,10 @@ export default function ToolsPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-8 text-center">
-        <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">Surplus Funds Recovery Tools</h1>
-        <p className="mt-2 text-gray-500">
-          Everything you need to find, claim, and recover surplus funds from US counties
+        <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">Everything You Need to Research, File, and Track Claims</h1>
+        <p className="mt-2 text-gray-500 max-w-2xl mx-auto">
+          Start with the county Directory, verify owners with OSINT tools, organize your cases in the
+          Claims Tracker, then export data as CSV when you&apos;re ready to scale.
         </p>
       </div>
 
@@ -107,8 +119,17 @@ export default function ToolsPage() {
               href={tool.href}
               className={`rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all hover:shadow ${c.border}`}
             >
-              <div className={`mb-3 inline-flex rounded-lg p-2 ${c.bg}`}>
-                <tool.icon className={`h-5 w-5 ${c.text}`} />
+              <div className="mb-3 flex items-center justify-between">
+                <div className={`inline-flex rounded-lg p-2 ${c.bg}`}>
+                  <tool.icon className={`h-5 w-5 ${c.text}`} />
+                </div>
+                <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                  tool.tier === 'Pro'
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-gray-100 text-gray-600'
+                }`}>
+                  {tool.tier}
+                </span>
               </div>
               <h3 className="font-semibold text-gray-900">{tool.name}</h3>
               <p className="mt-1 text-sm text-gray-500">{tool.desc}</p>

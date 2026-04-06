@@ -8,20 +8,28 @@ import SearchBar from '@/components/search/SearchBar';
 import DonateSection from '@/components/DonateSection';
 
 async function getStats() {
-  const [totalCounties, stateGroups, withUrls] = await Promise.all([
-    prisma.county.count(),
-    prisma.county.groupBy({ by: ['state'] }).then(r => r.length),
-    prisma.county.count({ where: { listUrl: { not: null } } }),
-  ]);
-  return { totalCounties, stateCount: stateGroups, withUrls };
+  try {
+    const [totalCounties, stateGroups, withUrls] = await Promise.all([
+      prisma.county.count(),
+      prisma.county.groupBy({ by: ['state'] }).then(r => r.length),
+      prisma.county.count({ where: { listUrl: { not: null } } }),
+    ]);
+    return { totalCounties, stateCount: stateGroups, withUrls };
+  } catch {
+    return { totalCounties: 0, stateCount: 0, withUrls: 0 };
+  }
 }
 
 async function getRecentCounties() {
-  return prisma.county.findMany({
-    where: { listUrl: { not: null } },
-    orderBy: [{ state: 'asc' }, { name: 'asc' }],
-    take: 25,
-  });
+  try {
+    return await prisma.county.findMany({
+      where: { listUrl: { not: null } },
+      orderBy: [{ state: 'asc' }, { name: 'asc' }],
+      take: 25,
+    });
+  } catch {
+    return [];
+  }
 }
 
 function formatPop(n: number) {

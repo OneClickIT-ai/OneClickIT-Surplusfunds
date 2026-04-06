@@ -1,12 +1,9 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
 import AuthProvider from '@/components/Auth/AuthProvider';
 import Header from '@/components/Layout/Header';
 import Footer from '@/components/Layout/Footer';
 import { Analytics } from '@vercel/analytics/react';
-
-const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: {
@@ -76,7 +73,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} min-h-screen bg-gray-50`}>
+      <body className="min-h-screen bg-gray-50 font-sans">
         <AuthProvider>
           <div className="flex min-h-screen flex-col">
             <Header />

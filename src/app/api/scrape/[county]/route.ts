@@ -1,11 +1,20 @@
 import { NextRequest } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { scrapeCounty } from '@/lib/scraper';
 import { ok, err, handleError } from '@/lib/api-utils';
+import { rateLimit } from '@/lib/rate-limit';
 
 export async function POST(_req: NextRequest, { params }: { params: { county: string } }) {
   try {
-    // Allow public access for now — auth gating will be re-enabled later
+    const session = await getServerSession(authOptions);
+    if (!session) return err('Unauthorized', 401);
+
+    // Rate limit: 5 scrapes per minute per user
+    if (!rateLimit(`scrape:${session.user.id}`, { limit: 5, windowMs: 60_000 })) {
+      return err('Too many requests. Please try again later.', 429);
+    }
 
     const county = await prisma.county.findUnique({ where: { id: params.county } });
     if (!county) return err('County not found', 404);

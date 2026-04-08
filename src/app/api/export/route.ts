@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { err } from '@/lib/api-utils';
 import Papa from 'papaparse';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session) return err('Unauthorized', 401);
+
     const { searchParams } = request.nextUrl;
     const state = searchParams.get('state');
     const maxPop = searchParams.get('maxPop');

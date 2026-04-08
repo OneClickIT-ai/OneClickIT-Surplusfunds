@@ -1,6 +1,7 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from './auth';
 import { err } from './api-utils';
+import { rateLimit } from './rate-limit';
 
 /**
  * Middleware to check if user has Pro access for OSINT tools.
@@ -11,6 +12,10 @@ export async function requirePro() {
   if (!session) return err('Unauthorized', 401);
   if (session.user.role !== 'pro' && session.user.role !== 'admin') {
     return err('Pro subscription required for OSINT tools', 403);
+  }
+  // Rate limit: 30 OSINT requests per minute per user
+  if (!rateLimit(`osint:${session.user.id}`, { limit: 30, windowMs: 60_000 })) {
+    return err('Too many requests. Please try again later.', 429);
   }
   return null;
 }

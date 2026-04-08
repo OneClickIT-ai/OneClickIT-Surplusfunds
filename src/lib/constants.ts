@@ -35,5 +35,4 @@ export const POPULATION_RANGES = [
   { label: '500,000+', min: 500001, max: Infinity },
 ];
 
-export const CRON_SECRET = process.env.CRON_SECRET;
-export const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim());
+export const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim()).filter(Boolean);

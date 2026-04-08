@@ -18,8 +18,6 @@ export function handleError(error: unknown) {
 }
 
 export function requireCronSecret(request: Request) {
-  const cronSecret =
-    request.headers.get('authorization')?.replace('Bearer ', '') ??
-    new URL(request.url).searchParams.get('CRON_SECRET');
-  return cronSecret === process.env.CRON_SECRET;
+  const cronSecret = request.headers.get('authorization')?.replace('Bearer ', '');
+  return !!cronSecret && cronSecret === process.env.CRON_SECRET;
 }

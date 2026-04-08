@@ -13,24 +13,32 @@ interface PageProps {
 }
 
 async function getCounty(id: string) {
-  return prisma.county.findUnique({
-    where: { id },
-    include: {
-      fundsLists: {
-        orderBy: { scrapeDate: 'desc' },
-        take: 1,
+  try {
+    return await prisma.county.findUnique({
+      where: { id },
+      include: {
+        fundsLists: {
+          orderBy: { scrapeDate: 'desc' },
+          take: 1,
+        },
       },
-    },
-  });
+    });
+  } catch {
+    return null;
+  }
 }
 
 export async function generateMetadata({ params }: PageProps) {
-  const county = await prisma.county.findUnique({ where: { id: params.id } });
-  if (!county) return {};
-  return {
-    title: `${county.name} County, ${county.state} | Surplus Funds`,
-    description: `Surplus funds data for ${county.name} County, ${county.state}. Population: ${county.population.toLocaleString()}.`,
-  };
+  try {
+    const county = await prisma.county.findUnique({ where: { id: params.id } });
+    if (!county) return {};
+    return {
+      title: `${county.name} County, ${county.state} | Surplus Funds`,
+      description: `Surplus funds data for ${county.name} County, ${county.state}. Population: ${county.population.toLocaleString()}.`,
+    };
+  } catch {
+    return {};
+  }
 }
 
 export default async function CountyDetailPage({ params }: PageProps) {

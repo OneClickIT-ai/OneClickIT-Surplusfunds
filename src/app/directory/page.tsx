@@ -49,12 +49,15 @@ async function getCounties(params: PageProps['searchParams']) {
   if (params.minPop) where.population = { ...((where.population as object) || {}), gte: parseInt(params.minPop) };
   if (params.maxPop) where.population = { ...((where.population as object) || {}), lte: parseInt(params.maxPop) };
 
-  const [counties, total] = await Promise.all([
-    prisma.county.findMany({ where, orderBy: { rank: 'asc' }, take: LIMIT, skip }),
-    prisma.county.count({ where }),
-  ]);
-
-  return { counties, total, page, totalPages: Math.ceil(total / LIMIT) };
+  try {
+    const [counties, total] = await Promise.all([
+      prisma.county.findMany({ where, orderBy: { rank: 'asc' }, take: LIMIT, skip }),
+      prisma.county.count({ where }),
+    ]);
+    return { counties, total, page, totalPages: Math.ceil(total / LIMIT) };
+  } catch {
+    return { counties: [], total: 0, page, totalPages: 0 };
+  }
 }
 
 function formatPop(n: number) {

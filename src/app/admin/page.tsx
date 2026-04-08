@@ -8,18 +8,25 @@ import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 
 export default async function AdminPage() {
-  const session = await getServerSession(authOptions);
+  let session = null;
+  try { session = await getServerSession(authOptions); } catch { /* auth unavailable */ }
   if (!session || session.user.role !== 'admin') redirect('/');
 
-  const [totalCounties, totalFunds, recentScrapes] = await Promise.all([
-    prisma.county.count(),
-    prisma.fundsList.count(),
-    prisma.fundsList.findMany({
-      orderBy: { scrapeDate: 'desc' },
-      take: 10,
-      include: { county: { select: { name: true, state: true } } },
-    }),
-  ]);
+  let totalCounties = 0;
+  let totalFunds = 0;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let recentScrapes: any[] = [];
+  try {
+    [totalCounties, totalFunds, recentScrapes] = await Promise.all([
+      prisma.county.count(),
+      prisma.fundsList.count(),
+      prisma.fundsList.findMany({
+        orderBy: { scrapeDate: 'desc' },
+        take: 10,
+        include: { county: { select: { name: true, state: true } } },
+      }),
+    ]);
+  } catch { /* db unavailable */ }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">

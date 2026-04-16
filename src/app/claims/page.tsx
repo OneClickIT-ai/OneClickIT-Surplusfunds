@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Select from '@/components/ui/Select';
 import Input from '@/components/ui/Input';
+import PlacesAutocomplete from '@/components/ui/PlacesAutocomplete';
 import { US_STATES } from '@/lib/constants';
 
 interface Claim {
@@ -147,7 +148,14 @@ export default function ClaimsPage() {
               <option value="">Select state</option>
               {US_STATES.map(s => <option key={s.code} value={s.code}>{s.code} - {s.name}</option>)}
             </Select>
-            <Input label="Property Address" value={form.propertyAddr} onChange={e => setForm(f => ({ ...f, propertyAddr: e.target.value }))} placeholder="123 Main St" />
+            <div>
+              <label className="mb-1 block text-xs font-medium text-gray-700">Property Address</label>
+              <PlacesAutocomplete
+                placeholder="123 Main St, City, ST"
+                value={form.propertyAddr}
+                onChange={v => setForm(f => ({ ...f, propertyAddr: v }))}
+              />
+            </div>
             <Input label="Parcel ID" value={form.parcelId} onChange={e => setForm(f => ({ ...f, parcelId: e.target.value }))} placeholder="APN / Parcel #" />
             <Input label="Amount ($)" type="number" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} placeholder="5000" />
             <Input label="Deadline Date" type="date" value={form.deadlineDate} onChange={e => setForm(f => ({ ...f, deadlineDate: e.target.value }))} />

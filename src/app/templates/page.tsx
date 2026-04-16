@@ -1,5 +1,7 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { FileText, Copy, Download, Check } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
@@ -22,9 +24,19 @@ const CATEGORY_COLORS: Record<string, 'info' | 'success' | 'warning' | 'error'> 
 };
 
 export default function TemplatesPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [selected, setSelected] = useState<LetterTemplate | null>(null);
   const [values, setValues] = useState<Record<string, string>>({});
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') router.push('/auth/signin?callbackUrl=/templates');
+  }, [status, router]);
+
+  if (status === 'loading' || !session) {
+    return <div className="py-24 text-center text-sm text-gray-400">Loading...</div>;
+  }
 
   const handleSelect = (template: LetterTemplate) => {
     setSelected(template);

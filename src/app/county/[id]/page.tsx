@@ -28,8 +28,14 @@ export async function generateMetadata({ params }: PageProps) {
   const county = await prisma.county.findUnique({ where: { id: params.id } });
   if (!county) return {};
   return {
-    title: `${county.name} County, ${county.state} | Surplus Funds`,
-    description: `Surplus funds data for ${county.name} County, ${county.state}. Population: ${county.population.toLocaleString()}.`,
+    title: `${county.name} County, ${county.state} Surplus Funds`,
+    description: `Find surplus funds and excess proceeds from ${county.name} County, ${county.state}. Access the official surplus funds list, claim rules${county.claimDeadline ? `, deadline: ${county.claimDeadline}` : ''}, and filing information.`,
+    keywords: [`${county.name} County surplus funds`, `${county.state} surplus funds`, `${county.name} excess proceeds`, 'tax sale surplus', 'foreclosure surplus'],
+    alternates: { canonical: `/county/${params.id}` },
+    openGraph: {
+      title: `${county.name} County, ${county.state} — Surplus Funds`,
+      description: `Official surplus funds data for ${county.name} County, ${county.state}.`,
+    },
   };
 }
 

@@ -33,8 +33,35 @@ function formatPop(n: number) {
 export default async function HomePage() {
   const [stats, counties] = await Promise.all([getStats(), getRecentCounties()]);
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        '@id': 'https://surplusclickit.com/#website',
+        url: 'https://surplusclickit.com',
+        name: 'SurplusClickIT',
+        description: 'Surplus funds directory for US counties — tax sale overages, foreclosure surplus, and unclaimed property.',
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: { '@type': 'EntryPoint', urlTemplate: 'https://surplusclickit.com/directory?q={search_term_string}' },
+          'query-input': 'required name=search_term_string',
+        },
+      },
+      {
+        '@type': 'Organization',
+        '@id': 'https://surplusclickit.com/#organization',
+        name: 'SurplusClickIT',
+        url: 'https://surplusclickit.com',
+        logo: { '@type': 'ImageObject', url: 'https://surplusclickit.com/surplusfunds_favicon.png' },
+        contactPoint: { '@type': 'ContactPoint', email: 'ritacsolutions@gmail.com', contactType: 'customer support' },
+      },
+    ],
+  };
+
   return (
     <div>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {/* Launch banner */}
       <div className="bg-green-600 px-4 py-2.5 text-center text-sm font-medium text-white">
         Now Live &mdash; Start finding surplus funds today.{' '}

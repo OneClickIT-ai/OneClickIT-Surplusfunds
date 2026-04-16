@@ -1,5 +1,7 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { DollarSign, Calculator, Info } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
@@ -22,11 +24,21 @@ const STATE_FILING_FEES: Record<string, number> = {
 };
 
 export default function CalculatorPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [state, setState] = useState('');
   const [amount, setAmount] = useState('');
   const [feePercent, setFeePercent] = useState('33');
   const [researchCosts, setResearchCosts] = useState('200');
   const [result, setResult] = useState<Breakdown | null>(null);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') router.push('/auth/signin?callbackUrl=/calculator');
+  }, [status, router]);
+
+  if (status === 'loading' || !session) {
+    return <div className="py-24 text-center text-sm text-gray-400">Loading...</div>;
+  }
 
   const calculate = () => {
     const surplusAmount = parseFloat(amount) || 0;

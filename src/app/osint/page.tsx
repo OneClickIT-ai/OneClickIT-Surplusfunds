@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
+import PlacesAutocomplete from '@/components/ui/PlacesAutocomplete';
 
 type ToolType = 'people' | 'username' | 'address' | 'phone' | 'email';
 
@@ -93,13 +94,22 @@ export default function OsintPage() {
         <div className="flex gap-3">
           <div className="flex-1">
             <label htmlFor="osint-search" className="sr-only">{tool.placeholder}</label>
-            <Input
-              id="osint-search"
-              placeholder={tool.placeholder}
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSearch()}
-            />
+            {activeTool === 'address' ? (
+              <PlacesAutocomplete
+                id="osint-search"
+                placeholder={tool.placeholder}
+                value={query}
+                onChange={setQuery}
+              />
+            ) : (
+              <Input
+                id="osint-search"
+                placeholder={tool.placeholder}
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleSearch()}
+              />
+            )}
           </div>
           <Button onClick={handleSearch} loading={loading}>
             <Search className="mr-1.5 h-4 w-4" />

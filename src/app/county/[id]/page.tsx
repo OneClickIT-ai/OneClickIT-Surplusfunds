@@ -13,30 +13,38 @@ interface PageProps {
 }
 
 async function getCounty(id: string) {
-  return prisma.county.findUnique({
-    where: { id },
-    include: {
-      fundsLists: {
-        orderBy: { scrapeDate: 'desc' },
-        take: 1,
+  try {
+    return await prisma.county.findUnique({
+      where: { id },
+      include: {
+        fundsLists: {
+          orderBy: { scrapeDate: 'desc' },
+          take: 1,
+        },
       },
-    },
-  });
+    });
+  } catch {
+    return null;
+  }
 }
 
 export async function generateMetadata({ params }: PageProps) {
-  const county = await prisma.county.findUnique({ where: { id: params.id } });
-  if (!county) return {};
-  return {
-    title: `${county.name} County, ${county.state} Surplus Funds`,
-    description: `Find surplus funds and excess proceeds from ${county.name} County, ${county.state}. Access the official surplus funds list, claim rules${county.claimDeadline ? `, deadline: ${county.claimDeadline}` : ''}, and filing information.`,
-    keywords: [`${county.name} County surplus funds`, `${county.state} surplus funds`, `${county.name} excess proceeds`, 'tax sale surplus', 'foreclosure surplus'],
-    alternates: { canonical: `/county/${params.id}` },
-    openGraph: {
-      title: `${county.name} County, ${county.state} — Surplus Funds`,
-      description: `Official surplus funds data for ${county.name} County, ${county.state}.`,
-    },
-  };
+  try {
+    const county = await prisma.county.findUnique({ where: { id: params.id } });
+    if (!county) return {};
+    return {
+      title: `${county.name} County, ${county.state} Surplus Funds`,
+      description: `Find surplus funds and excess proceeds from ${county.name} County, ${county.state}. Access the official surplus funds list, claim rules${county.claimDeadline ? `, deadline: ${county.claimDeadline}` : ''}, and filing information.`,
+      keywords: [`${county.name} County surplus funds`, `${county.state} surplus funds`, `${county.name} excess proceeds`, 'tax sale surplus', 'foreclosure surplus'],
+      alternates: { canonical: `/county/${params.id}` },
+      openGraph: {
+        title: `${county.name} County, ${county.state} — Surplus Funds`,
+        description: `Official surplus funds data for ${county.name} County, ${county.state}.`,
+      },
+    };
+  } catch {
+    return {};
+  }
 }
 
 export default async function CountyDetailPage({ params }: PageProps) {

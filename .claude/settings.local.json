@@ -16,7 +16,25 @@
       "Bash(npx tsc:*)",
       "Bash(npm run:*)",
       "Bash(printf \"ritacsolutions@gmail.com\")",
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
+      "Bash(npx vercel:*)",
+      "Bash(vercel whoami:*)",
+      "Bash(echo \"OneClick Security <noreply@ocitsecurity.com>\")",
+      "Bash(vercel --version)",
+      "Bash(vercel integration:*)",
+      "Bash(vercel help:*)",
+      "Bash(ls -1d \"C:/Users/ritac/.claude/skills/\"*/)",
+      "Bash(nslookup ocitsecurity.com)",
+      "Bash(npx next:*)",
+      "Bash(while read:*)",
+      "Bash(do if:*)",
+      "Bash(then echo:*)",
+      "Bash(fi)",
+      "Bash(done)",
+      "WebFetch(domain:ocitsecurity.vercel.app)",
+      "WebFetch(domain:ocitsecurity.com)",
+      "WebFetch(domain:www.ocitsecurity.com)",
+      "WebFetch(domain:oneclicksecurity.us)"
     ]
   }
 }

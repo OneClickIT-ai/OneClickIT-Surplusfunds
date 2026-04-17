@@ -25,6 +25,13 @@ export async function POST(request: NextRequest) {
     const file = formData.get('file') as File;
     if (!file) return err('No file provided', 400);
 
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) return err('File too large. Maximum size is 5MB.', 400);
+
+    // Validate file type
+    const name = file.name?.toLowerCase() || '';
+    if (!name.endsWith('.csv')) return err('Only CSV files are accepted', 400);
+
     const text = await file.text();
     const { data } = Papa.parse<CountyRow>(text, { header: true, skipEmptyLines: true });
 

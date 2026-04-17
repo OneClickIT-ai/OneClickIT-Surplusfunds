@@ -10,13 +10,18 @@ import Card from '@/components/ui/Card';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminCountiesPage() {
-  const session = await getServerSession(authOptions);
+  let session = null;
+  try { session = await getServerSession(authOptions); } catch { /* auth unavailable */ }
   if (!session || session.user.role !== 'admin') redirect('/');
 
-  const counties = await prisma.county.findMany({
-    orderBy: { rank: 'asc' },
-    include: { _count: { select: { fundsLists: true } } },
-  });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let counties: any[] = [];
+  try {
+    counties = await prisma.county.findMany({
+      orderBy: { rank: 'asc' },
+      include: { _count: { select: { fundsLists: true } } },
+    });
+  } catch { /* db unavailable */ }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">

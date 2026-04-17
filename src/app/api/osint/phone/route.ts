@@ -1,12 +1,12 @@
 import { NextRequest } from 'next/server';
 import { ok, handleError } from '@/lib/api-utils';
-import { lookupPhone } from '@/lib/osint';
-import { rateLimit } from '@/lib/rate-limit';
+import { requirePro, lookupPhone } from '@/lib/osint';
 
 export async function POST(request: NextRequest) {
-  const limited = rateLimit(request);
-  if (limited) return limited;
   try {
+    const authError = await requirePro();
+    if (authError) return authError;
+
     const { query } = await request.json();
     if (!query) return ok({ results: [], source: 'No query' });
 

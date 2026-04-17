@@ -15,8 +15,13 @@ async function getUserIdFromCustomer(stripe: InstanceType<typeof import('stripe'
       return user?.id || null;
     }
     return null;
-  } catch {
-    return null;
+  } catch (error: unknown) {
+    // Only swallow "resource not found" — let transient errors propagate
+    // so the webhook returns 400 and Stripe retries
+    if (error && typeof error === 'object' && 'statusCode' in error && (error as { statusCode: number }).statusCode === 404) {
+      return null;
+    }
+    throw error;
   }
 }
 

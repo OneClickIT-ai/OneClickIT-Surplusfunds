@@ -9,17 +9,23 @@ import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 
 export default async function DashboardPage() {
-  const session = await getServerSession(authOptions);
+  let session = null;
+  try { session = await getServerSession(authOptions); } catch { /* auth unavailable */ }
 
-  const stats = await prisma.county.count();
+  let stats = 0;
+  try { stats = await prisma.county.count(); } catch { /* db unavailable */ }
 
   // Authenticated dashboard
   if (session) {
-    const alerts = await prisma.alert.findMany({
-      where: { userId: session.user.id, active: true },
-      include: { county: true },
-      orderBy: { createdAt: 'desc' },
-    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let alerts: any[] = [];
+    try {
+      alerts = await prisma.alert.findMany({
+        where: { userId: session.user.id, active: true },
+        include: { county: true },
+        orderBy: { createdAt: 'desc' },
+      });
+    } catch { /* db unavailable */ }
 
     const isPro = session.user.role === 'pro' || session.user.role === 'admin';
     const firstName = session.user.name?.split(' ')[0] || session.user.email?.split('@')[0] || 'there';

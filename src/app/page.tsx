@@ -41,12 +41,39 @@ function formatPop(n: number) {
 export default async function HomePage() {
   const [stats, counties] = await Promise.all([getStats(), getRecentCounties()]);
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        '@id': 'https://surplusclickit.com/#website',
+        url: 'https://surplusclickit.com',
+        name: 'SurplusClickIT',
+        description: 'Surplus funds directory for US counties — tax sale overages, foreclosure surplus, and unclaimed property.',
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: { '@type': 'EntryPoint', urlTemplate: 'https://surplusclickit.com/directory?q={search_term_string}' },
+          'query-input': 'required name=search_term_string',
+        },
+      },
+      {
+        '@type': 'Organization',
+        '@id': 'https://surplusclickit.com/#organization',
+        name: 'SurplusClickIT',
+        url: 'https://surplusclickit.com',
+        logo: { '@type': 'ImageObject', url: 'https://surplusclickit.com/surplusfunds_favicon.png' },
+        contactPoint: { '@type': 'ContactPoint', email: 'ritacsolutions@gmail.com', contactType: 'customer support' },
+      },
+    ],
+  };
+
   return (
     <div>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {/* Launch banner */}
       <div className="bg-green-600 px-4 py-2.5 text-center text-sm font-medium text-white">
-        Official Launch: April 7, 2026 &mdash;{' '}
-        <a href="/auth/signup" className="underline hover:text-green-100">Sign up now for early access</a>
+        Now Live &mdash; Start finding surplus funds today.{' '}
+        <a href="/auth/signup" className="underline hover:text-green-100">Create your free account</a>
       </div>
 
       {/* Hero */}
@@ -59,11 +86,11 @@ export default async function HomePage() {
             {stats.withUrls} counties with online lists across {stats.stateCount} states
           </div>
           <h1 className="mb-4 text-3xl font-bold text-white sm:text-5xl">
-            Find Surplus Funds<br />from US Counties
+            Find Surplus Funds and<br />Unclaimed Money from US Counties
           </h1>
           <p className="mb-8 text-lg text-blue-100">
-            Search publicly available tax sale proceeds, foreclosure overages, and unclaimed
-            property lists from county treasurers and clerks nationwide.
+            Search tax sale surplus, foreclosure overages, and unclaimed property lists from
+            county treasurers and clerks nationwide &mdash; all in one searchable directory.
           </p>
           <div className="mx-auto max-w-xl">
             <SearchBar size="large" />
@@ -96,6 +123,15 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Freemium disclaimer */}
+      <section className="bg-white px-4 pb-2">
+        <p className="mx-auto max-w-2xl text-center text-xs text-gray-400">
+          The core county directory is free to browse forever. Pro plans unlock CSV exports,
+          vetted data, and advanced tracking for professional surplus-funds businesses.{' '}
+          <Link href="/pricing" className="text-blue-500 hover:underline">View pricing</Link>
+        </p>
       </section>
 
       {/* How to Claim Surplus Funds — 8 steps */}
@@ -150,8 +186,8 @@ export default async function HomePage() {
                   icon: <Shield className="h-5 w-5" />,
                   color: 'purple',
                   title: 'Identify the Rightful Claimant',
-                  desc: 'Use our Pro OSINT tools to locate the former property owner or their heirs. Verify addresses, phone numbers, and public records to confirm identity and establish contact.',
-                  tag: 'Pro feature',
+                  desc: 'Use our free OSINT tools to locate the former property owner or their heirs. Verify addresses, phone numbers, and public records to confirm identity and establish contact.',
+                  tag: 'Free tool',
                 },
                 {
                   step: 6,
@@ -244,15 +280,15 @@ export default async function HomePage() {
 
         {counties.length > 0 ? (
           <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
-            <table className="min-w-full divide-y divide-gray-200">
+            <table className="min-w-full divide-y divide-gray-200" aria-label="Surplus funds county directory">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">County</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">State</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Population</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Source</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Deadline</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">List</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">County</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">State</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Population</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Source</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Deadline</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">List</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">

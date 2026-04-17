@@ -23,10 +23,26 @@ export function rateLimit(
 
 // Periodically clean up expired entries (every 5 minutes)
 if (typeof setInterval !== 'undefined') {
-  setInterval(() => {
+  const timer = setInterval(() => {
     const now = Date.now();
     rateMap.forEach((entry, key) => {
       if (now > entry.resetTime) rateMap.delete(key);
     });
   }, 5 * 60_000);
+  // Don't prevent Node.js from shutting down cleanly
+  if (timer && typeof timer === 'object' && 'unref' in timer) {
+    timer.unref();
+  }
+}
+
+/**
+ * Extract client IP — prefer x-real-ip (set by Vercel, not spoofable)
+ * over x-forwarded-for (spoofable). Reject requests with no identifiable IP.
+ */
+export function getClientIP(headers: Headers): string | null {
+  return (
+    headers.get('x-real-ip') ||
+    headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    null
+  );
 }

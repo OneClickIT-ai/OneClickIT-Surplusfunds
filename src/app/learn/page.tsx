@@ -1,3 +1,6 @@
+import { getServerSession } from 'next-auth';
+import { redirect } from 'next/navigation';
+import { authOptions } from '@/lib/auth';
 import { BookOpen, AlertTriangle, Scale, DollarSign, FileText, Search, Users, Shield } from 'lucide-react';
 import Link from 'next/link';
 
@@ -303,13 +306,16 @@ const colorMap: Record<string, { bg: string; text: string; border: string }> = {
   red:    { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-200' },
 };
 
-export default function LearnPage() {
+export default async function LearnPage() {
+  const session = await getServerSession(authOptions);
+  if (!session) redirect('/auth/signin?callbackUrl=/learn');
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-8 text-center">
         <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">Surplus Funds Recovery — Complete Guide</h1>
-        <p className="mt-2 text-gray-500">
-          A comprehensive syllabus for learning how to find, claim, and recover surplus funds from US counties
+        <p className="mt-2 text-gray-500 max-w-2xl mx-auto">
+          New to surplus funds? Start with the basics below. Already operating a business? Jump to
+          advanced guides on scaling, compliance, and automation.
         </p>
       </div>
 
@@ -340,11 +346,14 @@ export default function LearnPage() {
         <h3 className="mb-3 font-semibold text-blue-900">Practice Tools</h3>
         <div className="grid gap-2 sm:grid-cols-3 text-sm">
           <Link href="/directory" className="rounded-lg bg-white px-3 py-2 text-blue-700 border border-blue-200 hover:shadow text-center">County Directory</Link>
+          <Link href="/osint" className="rounded-lg bg-white px-3 py-2 text-green-700 border border-green-200 hover:shadow text-center">OSINT Tools</Link>
+          <Link href="/lookup" className="rounded-lg bg-white px-3 py-2 text-orange-700 border border-orange-200 hover:shadow text-center">Third-Party Lookup</Link>
           <Link href="/dorks" className="rounded-lg bg-white px-3 py-2 text-blue-700 border border-blue-200 hover:shadow text-center">Google Dork Tool</Link>
           <Link href="/requirements" className="rounded-lg bg-white px-3 py-2 text-blue-700 border border-blue-200 hover:shadow text-center">State Requirements</Link>
           <Link href="/calculator" className="rounded-lg bg-white px-3 py-2 text-blue-700 border border-blue-200 hover:shadow text-center">Claim Calculator</Link>
           <Link href="/templates" className="rounded-lg bg-white px-3 py-2 text-blue-700 border border-blue-200 hover:shadow text-center">Letter Templates</Link>
           <Link href="/claims" className="rounded-lg bg-white px-3 py-2 text-blue-700 border border-blue-200 hover:shadow text-center">Claim Tracker</Link>
+          <Link href="/unclaimed" className="rounded-lg bg-white px-3 py-2 text-purple-700 border border-purple-200 hover:shadow text-center">Unclaimed Property</Link>
         </div>
       </div>
 

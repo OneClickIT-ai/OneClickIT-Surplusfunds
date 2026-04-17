@@ -3,6 +3,7 @@ import { Download, FileSpreadsheet, Database } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Select from '@/components/ui/Select';
+import ProGate from '@/components/ui/ProGate';
 import { useState } from 'react';
 import { US_STATES } from '@/lib/constants';
 
@@ -16,10 +17,11 @@ export default function ExportPage() {
   };
 
   return (
+    <ProGate>
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Export Data</h1>
-        <p className="text-sm text-gray-500">Download surplus funds data as CSV</p>
+        <p className="text-sm text-gray-500">CSV exports are available on Pro plans so you can analyze county and funds data in Excel, Google Sheets, or your own CRM.</p>
       </div>
 
       {/* Filter */}
@@ -74,5 +76,6 @@ export default function ExportPage() {
         Exports include all publicly available data. Updated with each scrape cycle.
       </p>
     </div>
+    </ProGate>
   );
 }

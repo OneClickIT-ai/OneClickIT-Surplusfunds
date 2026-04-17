@@ -1,11 +1,23 @@
 'use client';
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSession, signOut } from 'next-auth/react';
-import { Search, LayoutDashboard, Settings, LogOut, LogIn, Shield, Wrench, ClipboardList, BookOpen, Landmark, ExternalLink } from 'lucide-react';
+import { Search, LayoutDashboard, Settings, LogOut, LogIn, Shield, Wrench, ClipboardList, BookOpen, Landmark, DollarSign, Menu, X } from 'lucide-react';
+
+const NAV_LINKS = [
+  { href: '/directory', label: 'Directory', icon: Search, color: 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' },
+  { href: '/osint', label: 'OSINT', icon: Shield, color: 'text-green-600 hover:bg-green-50 hover:text-green-700' },
+  { href: '/claims', label: 'Claims', icon: ClipboardList, color: 'text-blue-600 hover:bg-blue-50 hover:text-blue-700' },
+  { href: '/unclaimed', label: 'Unclaimed', icon: Landmark, color: 'text-purple-600 hover:bg-purple-50 hover:text-purple-700' },
+  { href: '/tools', label: 'Tools', icon: Wrench, color: 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' },
+  { href: '/learn', label: 'Learn', icon: BookOpen, color: 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' },
+  { href: '/pricing', label: 'Pricing', icon: DollarSign, color: 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' },
+];
 
 export default function Header() {
   const { data: session } = useSession();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur">
@@ -27,62 +39,18 @@ export default function Header() {
           />
         </Link>
 
-        <nav className="flex items-center gap-1 sm:gap-2">
-          <Link
-            href="/directory"
-            className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-          >
-            <Search className="h-4 w-4" />
-            <span className="hidden sm:block">Directory</span>
-          </Link>
-
-          <Link
-            href="/osint"
-            className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-green-600 hover:bg-green-50 hover:text-green-700"
-          >
-            <Shield className="h-4 w-4" />
-            <span className="hidden sm:block">OSINT</span>
-          </Link>
-
-          <Link
-            href="/claims"
-            className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 hover:text-blue-700"
-          >
-            <ClipboardList className="h-4 w-4" />
-            <span className="hidden sm:block">Claims</span>
-          </Link>
-
-          <Link
-            href="/unclaimed"
-            className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 hover:text-purple-700"
-          >
-            <Landmark className="h-4 w-4" />
-            <span className="hidden sm:block">Unclaimed</span>
-          </Link>
-
-          <Link
-            href="/lookup"
-            className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-orange-600 hover:bg-orange-50 hover:text-orange-700"
-          >
-            <ExternalLink className="h-4 w-4" />
-            <span className="hidden sm:block">Lookup</span>
-          </Link>
-
-          <Link
-            href="/tools"
-            className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-          >
-            <Wrench className="h-4 w-4" />
-            <span className="hidden sm:block">Tools</span>
-          </Link>
-
-          <Link
-            href="/learn"
-            className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-          >
-            <BookOpen className="h-4 w-4" />
-            <span className="hidden sm:block">Learn</span>
-          </Link>
+        {/* Desktop nav */}
+        <nav aria-label="Main navigation" className="hidden md:flex items-center gap-1 sm:gap-2">
+          {NAV_LINKS.map(link => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm ${link.color}`}
+            >
+              <link.icon className="h-4 w-4" />
+              <span>{link.label}</span>
+            </Link>
+          ))}
 
           {session ? (
             <div className="ml-1 flex items-center gap-2 border-l border-gray-200 pl-3">
@@ -101,7 +69,7 @@ export default function Header() {
                 ) : (
                   <LayoutDashboard className="h-4 w-4" />
                 )}
-                <span className="hidden sm:block">Dashboard</span>
+                Dashboard
               </Link>
 
               {session.user.role === 'admin' && (
@@ -134,12 +102,89 @@ export default function Header() {
                 className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700"
               >
                 <LogIn className="h-4 w-4" />
-                Sign up
+                Start free
               </Link>
             </div>
           )}
         </nav>
+
+        {/* Mobile hamburger button */}
+        <button
+          onClick={() => setMobileOpen(!mobileOpen)}
+          className="md:hidden flex items-center justify-center rounded-lg p-2 text-gray-600 hover:bg-gray-100"
+          aria-label="Toggle menu"
+        >
+          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
       </div>
+
+      {/* Mobile menu */}
+      {mobileOpen && (
+        <div className="md:hidden border-t border-gray-100 bg-white px-4 pb-4 pt-2">
+          <nav aria-label="Mobile navigation" className="space-y-1">
+            {NAV_LINKS.map(link => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileOpen(false)}
+                className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm ${link.color}`}
+              >
+                <link.icon className="h-4 w-4" />
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="mt-3 border-t border-gray-100 pt-3">
+            {session ? (
+              <div className="space-y-1">
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2.5 text-sm font-medium text-blue-700"
+                >
+                  <LayoutDashboard className="h-4 w-4" />
+                  Dashboard
+                </Link>
+                {session.user.role === 'admin' && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-gray-600 hover:bg-gray-100"
+                  >
+                    <Settings className="h-4 w-4" />
+                    Admin
+                  </Link>
+                )}
+                <button
+                  onClick={() => { signOut({ callbackUrl: '/' }); setMobileOpen(false); }}
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-gray-600 hover:bg-gray-100"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign out
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Link
+                  href="/auth/signin"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex-1 rounded-lg border border-gray-200 px-3 py-2.5 text-center text-sm text-gray-600 hover:bg-gray-50"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/auth/signup"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex-1 rounded-lg bg-green-600 px-3 py-2.5 text-center text-sm font-medium text-white hover:bg-green-700"
+                >
+                  Sign up
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   );
 }

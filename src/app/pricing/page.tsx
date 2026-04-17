@@ -1,6 +1,6 @@
 'use client';
 import { useSession, signIn } from 'next-auth/react';
-import { Check, Zap, Shield, Search, Download, Bell, Users } from 'lucide-react';
+import { Check, Shield, Search, Download, Bell } from 'lucide-react';
 import Image from 'next/image';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
@@ -39,18 +39,18 @@ const PLANS = [
 ];
 
 const FREE_FEATURES = [
-  'Browse 50+ county directory',
-  'View basic surplus listings',
-  '5 county detail views per day',
-  'State filter & search',
+  'Browse 200+ county directory',
+  'State filter & keyword search',
+  'OSINT people, address, phone & email lookup',
+  'Third-party lookup library (150+ tools)',
+  'Unclaimed property search (all 50 states)',
+  'Claims tracker (limited)',
+  'Learning center, templates & calculator',
 ];
 
 const PRO_FEATURES = [
   'Everything in Free, plus:',
   'Full vetted & sorted surplus data',
-  'OSINT people search tools',
-  'Address verification & lookup',
-  'Phone & email checker',
   'CSV export of filtered results',
   'Priority alert notifications',
   'Unlimited county detail views',
@@ -88,10 +88,11 @@ export default function PricingPage() {
           <Image src="/surplusfunds_favicon.png" alt="" width={48} height={48} className="h-12 w-12" />
         </div>
         <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">
-          Unlock the Full Platform
+          Start Free. Upgrade When You&apos;re Ready to Scale.
         </h1>
-        <p className="mt-3 text-lg text-gray-500">
-          Free basic access. Upgrade for vetted data, OSINT tools, and faster claims.
+        <p className="mt-3 text-lg text-gray-500 max-w-2xl mx-auto">
+          Browse the county directory at no cost. Upgrade to Pro for CSV exports, advanced
+          tracking, and vetted data &mdash; from $1 to get started.
         </p>
       </div>
 
@@ -123,7 +124,7 @@ export default function PricingPage() {
           </div>
           <div className="mb-4">
             <h2 className="text-xl font-bold text-gray-900">Pro Access</h2>
-            <p className="text-sm text-gray-500 mt-1">Full platform + OSINT tools</p>
+            <p className="text-sm text-gray-500 mt-1">Full platform + exports &amp; unlimited access</p>
           </div>
           <ul className="space-y-3 mb-6">
             {PRO_FEATURES.map(f => (
@@ -134,16 +135,14 @@ export default function PricingPage() {
             ))}
           </ul>
 
-          {/* OSINT tools preview */}
+          {/* Pro tools preview */}
           <div className="mb-6 rounded-lg bg-gray-50 p-4">
-            <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wide">OSINT Tools Included</p>
+            <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wide">Pro Exclusive Features</p>
             <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
-              <span className="flex items-center gap-1"><Users className="h-3 w-3" /> People Search</span>
-              <span className="flex items-center gap-1"><Search className="h-3 w-3" /> Address Lookup</span>
-              <span className="flex items-center gap-1"><Zap className="h-3 w-3" /> Phone Checker</span>
-              <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> Email Verify</span>
               <span className="flex items-center gap-1"><Download className="h-3 w-3" /> CSV Export</span>
-              <span className="flex items-center gap-1"><Bell className="h-3 w-3" /> Smart Alerts</span>
+              <span className="flex items-center gap-1"><Bell className="h-3 w-3" /> Priority Alerts</span>
+              <span className="flex items-center gap-1"><Search className="h-3 w-3" /> Unlimited Views</span>
+              <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> Vetted Data</span>
             </div>
           </div>
         </Card>
@@ -183,8 +182,37 @@ export default function PricingPage() {
         ))}
       </div>
 
-      {/* FAQ / Trust */}
-      <div className="mt-12 text-center text-sm text-gray-400">
+      {/* ROI callout */}
+      <div className="mt-12 rounded-xl bg-green-50 border border-green-200 p-6 text-center">
+        <p className="text-lg font-semibold text-green-900 mb-1">
+          One closed claim can pay for a year of Pro.
+        </p>
+        <p className="text-sm text-green-700">
+          Average surplus funds claims range from $1,000 to $50,000+. Pro tools help you find,
+          verify, and file faster &mdash; so you close more claims with less effort.
+        </p>
+      </div>
+
+      {/* FAQ */}
+      <div className="mt-12">
+        <h2 className="text-xl font-semibold text-gray-900 mb-6 text-center">Pricing FAQ</h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {[
+            { q: 'Can I cancel anytime?', a: 'Yes. Cancel your subscription at any time. Your access continues until the end of your billing period.' },
+            { q: 'Is the county directory really free?', a: 'Yes. Browsing the directory, searching counties, and using OSINT tools will always be free. Pro unlocks exports and advanced features.' },
+            { q: 'Do you offer refunds?', a: 'Refunds are handled case-by-case. Contact us within 7 days of purchase if you are unsatisfied.' },
+            { q: 'Will new counties be added?', a: 'Yes. We continuously add new counties and update existing data. Pro members get access to all future additions.' },
+          ].map(item => (
+            <div key={item.q} className="rounded-xl border border-gray-200 bg-white p-5">
+              <h3 className="font-medium text-gray-900 text-sm mb-1">{item.q}</h3>
+              <p className="text-sm text-gray-500">{item.a}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Trust */}
+      <div className="mt-10 text-center text-sm text-gray-400">
         <p>Secure payments via Stripe. Cancel anytime. No hidden fees.</p>
         <p className="mt-1">All data sourced from public county records. OSINT tools use publicly available information only.</p>
       </div>

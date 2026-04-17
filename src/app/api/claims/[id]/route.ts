@@ -19,6 +19,9 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     });
 
     if (!claim) return err('Claim not found', 404);
+    if (claim.userId && claim.userId !== session.user.id && session.user.role !== 'admin') {
+      return err('Forbidden', 403);
+    }
     return ok(claim);
   } catch (error) {
     return handleError(error);
@@ -36,6 +39,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     const existing = await prisma.claim.findUnique({ where: { id } });
     if (!existing) return err('Claim not found', 404);
+    if (existing.userId && existing.userId !== session.user.id && session.user.role !== 'admin') {
+      return err('Forbidden', 403);
+    }
 
     const data: Record<string, unknown> = {};
     if (validated.status !== undefined) data.status = validated.status;
@@ -76,6 +82,11 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     if (!session) return err('Unauthorized', 401);
 
     const { id } = await params;
+    const claim = await prisma.claim.findUnique({ where: { id } });
+    if (!claim) return err('Claim not found', 404);
+    if (claim.userId && claim.userId !== session.user.id && session.user.role !== 'admin') {
+      return err('Forbidden', 403);
+    }
     await prisma.claim.delete({ where: { id } });
     return ok({ deleted: true });
   } catch (error) {

@@ -367,8 +367,12 @@ export default function LookupToolsPage() {
         <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
           Third-Party Lookup Tools
         </h1>
-        <p className="mt-2 text-gray-500">
-          {totalTools} search tools across {CATEGORIES.length} categories — enter a query and search across multiple services instantly
+        <p className="mt-2 text-gray-500 max-w-2xl mx-auto">
+          This lookup library collects {totalTools} public search tools across {CATEGORIES.length} categories
+          for people, property, business, court, and more. Use it as a reference when you need a
+          specific data source beyond the SurplusClickIT directory.
+          For a streamlined OSINT workflow, see our{' '}
+          <a href="/osint" className="text-blue-600 hover:underline">OSINT Tools page</a>.
         </p>
       </div>
 

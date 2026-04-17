@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
+import PlacesAutocomplete from '@/components/ui/PlacesAutocomplete';
 
 type ToolType = 'people' | 'username' | 'address' | 'phone' | 'email';
 
@@ -63,7 +64,8 @@ export default function OsintPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">OSINT Tools</h1>
         <p className="text-sm text-gray-500">
-          Public records lookup for asset recovery and skip tracing
+          Use these OSINT (open-source intelligence) tools to verify owners, heirs, and contact
+          information. All searches use publicly available data &mdash; always confirm results with official records.
         </p>
       </div>
 
@@ -73,6 +75,8 @@ export default function OsintPage() {
           <button
             key={t.id}
             onClick={() => { setActiveTool(t.id); setResult(null); setError(''); }}
+            aria-label={`Select ${t.name} tool`}
+            aria-pressed={activeTool === t.id}
             className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
               activeTool === t.id
                 ? 'bg-green-600 text-white'
@@ -89,12 +93,23 @@ export default function OsintPage() {
       <Card className="mb-6">
         <div className="flex gap-3">
           <div className="flex-1">
-            <Input
-              placeholder={tool.placeholder}
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSearch()}
-            />
+            <label htmlFor="osint-search" className="sr-only">{tool.placeholder}</label>
+            {activeTool === 'address' ? (
+              <PlacesAutocomplete
+                id="osint-search"
+                placeholder={tool.placeholder}
+                value={query}
+                onChange={setQuery}
+              />
+            ) : (
+              <Input
+                id="osint-search"
+                placeholder={tool.placeholder}
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleSearch()}
+              />
+            )}
           </div>
           <Button onClick={handleSearch} loading={loading}>
             <Search className="mr-1.5 h-4 w-4" />

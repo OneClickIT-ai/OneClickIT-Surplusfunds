@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft, ExternalLink, Phone, Clock, DollarSign, Search, AlertTriangle, CheckCircle, Info } from 'lucide-react';
 import { STATE_UNCLAIMED_PROGRAMS } from '@/lib/unclaimed-property-states';
@@ -8,6 +9,22 @@ import { notFound } from 'next/navigation';
 
 interface Props {
   params: { state: string };
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const stateCode = params.state.toUpperCase();
+  const program = STATE_UNCLAIMED_PROGRAMS.find(s => s.code === stateCode);
+  if (!program) return {};
+  return {
+    title: `${program.name} Unclaimed Property — Search & Claim Guide`,
+    description: `Search for unclaimed property in ${program.name}. Find missing money, forgotten bank accounts, and unclaimed assets through the official ${program.name} state portal.`,
+    keywords: [`${program.name} unclaimed property`, `${stateCode} missing money`, `${program.name} unclaimed funds`, 'unclaimed property search'],
+    alternates: { canonical: `/unclaimed/${params.state.toLowerCase()}` },
+    openGraph: {
+      title: `${program.name} Unclaimed Property Search`,
+      description: `Find and claim unclaimed property in ${program.name} — official state portal links, tips, and deadlines.`,
+    },
+  };
 }
 
 export default async function StateUnclaimedPage({ params }: Props) {

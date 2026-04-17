@@ -17,7 +17,7 @@ export default function RequirementsPage() {
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">State Claim Requirements</h1>
-        <p className="text-sm text-gray-500">Documents, deadlines, statutes, and filing offices by state</p>
+        <p className="text-sm text-gray-500">Documents, deadlines, statutes, and filing offices by state. Requirements change over time &mdash; always confirm deadlines and paperwork directly with the county or state before filing.</p>
       </div>
 
       <div className="mb-6">
@@ -48,6 +48,7 @@ export default function RequirementsPage() {
               <button
                 key={req.state}
                 onClick={() => setSelectedState(req.state)}
+                aria-label={`View ${req.stateName} claim requirements`}
                 className="rounded-xl border border-gray-200 bg-white p-4 text-left shadow-sm hover:border-blue-300 hover:shadow transition-all"
               >
                 <div className="flex items-center justify-between mb-1">

@@ -100,7 +100,9 @@ export default function DorksPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Google Dork Search Tool</h1>
         <p className="text-sm text-gray-500">
-          Generate targeted Google searches to find surplus funds lists, claim forms, and county office pages
+          Google dorks are advanced search patterns that help surface surplus funds lists, auctions, and
+          public records that don&apos;t appear with normal searches. Use them responsibly and always
+          respect each site&apos;s terms of use.
         </p>
       </div>
 
@@ -141,10 +143,10 @@ export default function DorksPage() {
                     </code>
                   </div>
                   <div className="flex flex-shrink-0 gap-1">
-                    <Button size="sm" variant="outline" onClick={() => handleCopy(query, idx)}>
+                    <Button size="sm" variant="outline" onClick={() => handleCopy(query, idx)} aria-label={`Copy ${dork.name} query`}>
                       {copiedIdx === idx ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
                     </Button>
-                    <Button size="sm" variant="primary" onClick={() => openGoogle(query)}>
+                    <Button size="sm" variant="primary" onClick={() => openGoogle(query)} aria-label={`Search Google for ${dork.name}`}>
                       <Search className="h-3.5 w-3.5" />
                     </Button>
                   </div>

@@ -6,12 +6,12 @@ import Button from '@/components/ui/Button';
 import Link from 'next/link';
 
 const BENEFITS = [
-  'Browse 90+ county surplus funds lists across 10 states',
+  'Browse 200+ county surplus funds lists across 10 states',
   'Search by state, population, and keywords',
   'Direct links to official county surplus funds pages',
   'View claim rules, deadlines, and statutes per county',
-  'Save counties and set up alerts',
-  'Upgrade to Pro for OSINT tools, CSV exports, and more',
+  'Free OSINT tools: people search, address, phone & email lookup',
+  'Upgrade to Pro for CSV exports, vetted data, and priority alerts',
 ];
 
 export default function SignUpPage() {
@@ -25,7 +25,7 @@ export default function SignUpPage() {
           <h1 className="text-2xl font-bold text-gray-900">Create Your Account</h1>
           <p className="mt-1 text-sm text-gray-500">Join the surplus funds intelligence platform</p>
           <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-            Launching April 7, 2026
+            100% Free — No Credit Card Required
           </div>
         </div>
 
@@ -67,7 +67,10 @@ export default function SignUpPage() {
         </p>
 
         <p className="mt-4 text-center text-xs text-gray-400">
-          By creating an account you agree that surplus funds data is public information.
+          By creating an account you agree to our{' '}
+          <Link href="/terms" className="underline hover:text-gray-600">Terms of Service</Link>{' '}
+          and{' '}
+          <Link href="/privacy" className="underline hover:text-gray-600">Privacy Policy</Link>.
           No legal claims are made on your behalf.
         </p>
       </div>

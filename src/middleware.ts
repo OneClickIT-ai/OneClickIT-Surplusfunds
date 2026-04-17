@@ -9,5 +9,6 @@ export const config = {
     '/claims/:path*',
     '/export/:path*',
     '/dashboard/:path*',
+    '/admin/:path*',
   ],
 };

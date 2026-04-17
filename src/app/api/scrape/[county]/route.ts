@@ -12,7 +12,7 @@ export async function POST(_req: NextRequest, { params }: { params: { county: st
     if (!session) return err('Unauthorized', 401);
 
     // Rate limit: 5 scrapes per minute per user
-    if (!rateLimit(`scrape:${session.user.id}`, { limit: 5, windowMs: 60_000 })) {
+    if (!rateLimit(`scrape:${session.user.id}`, 5, 60_000).success) {
       return err('Too many requests. Please try again later.', 429);
     }
 

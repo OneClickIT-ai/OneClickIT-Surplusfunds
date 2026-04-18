@@ -8,6 +8,63 @@ datasource db {
   directUrl = env("POSTGRES_URL")
 }
 
+// ----- Enums -----
+
+enum SurplusType {
+  TAX_SALE
+  FORECLOSURE
+  MORTGAGE
+  HOA
+  OTHER
+}
+
+enum LeadStatus {
+  NEW
+  RESEARCHING
+  SKIP_TRACED
+  CONTACTED
+  CONVERTED
+  DEAD
+}
+
+enum TaskType {
+  CALL
+  EMAIL
+  SMS
+  SEND_AGREEMENT
+  FILE_WITH_COUNTY
+  FOLLOW_UP
+  DOCUMENT
+  RESEARCH
+  COURT
+  OTHER
+}
+
+enum AgreementType {
+  ENGAGEMENT
+  ASSIGNMENT
+  FEE_DISCLOSURE
+}
+
+enum AgreementStatus {
+  DRAFT
+  SENT
+  VIEWED
+  SIGNED
+  DECLINED
+  EXPIRED
+}
+
+enum ContactChannel {
+  CALL
+  SMS
+  EMAIL
+  MAIL
+  IN_PERSON
+}
+
+// ----- Models -----
+
 model County {
   id            String      @id @default(cuid())
   rank          Int
@@ -28,8 +85,14 @@ model County {
   createdAt     DateTime    @default(now()) @map("created_at")
   updatedAt     DateTime    @updatedAt @map("updated_at")
 
+  deadlineDays  Int?        @map("deadline_days")
+  feeCap        Float?      @map("fee_cap")
+  requiresCourt Boolean     @default(false) @map("requires_court")
+  easyRating    Int?        @map("easy_rating")
+
   fundsLists    FundsList[]
   alerts        Alert[]
+  leads         SurplusLead[]
 
   @@unique([name, state])
   @@index([state])
@@ -38,15 +101,16 @@ model County {
 }
 
 model FundsList {
-  id         String   @id @default(cuid())
-  countyId   String   @map("county_id")
-  scrapeDate DateTime @default(now()) @map("scrape_date")
-  status     String   @default("pending")
-  fundsData  Json?    @map("funds_data")
-  errorMsg   String?  @map("error_msg")
-  createdAt  DateTime @default(now()) @map("created_at")
+  id         String        @id @default(cuid())
+  countyId   String        @map("county_id")
+  scrapeDate DateTime      @default(now()) @map("scrape_date")
+  status     String        @default("pending")
+  fundsData  Json?         @map("funds_data")
+  errorMsg   String?       @map("error_msg")
+  createdAt  DateTime      @default(now()) @map("created_at")
 
-  county     County   @relation(fields: [countyId], references: [id], onDelete: Cascade)
+  county     County        @relation(fields: [countyId], references: [id], onDelete: Cascade)
+  leads      SurplusLead[]
 
   @@index([countyId])
   @@index([scrapeDate])
@@ -54,18 +118,21 @@ model FundsList {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  name          String?
-  image         String?
-  role          String    @default("user")
-  savedSearches Json?     @map("saved_searches") @default("[]")
-  createdAt     DateTime  @default(now()) @map("created_at")
+  id             String    @id @default(cuid())
+  email          String    @unique
+  name           String?
+  image          String?
+  role           String    @default("user")
+  savedSearches  Json?     @default("[]") @map("saved_searches")
+  createdAt      DateTime  @default(now()) @map("created_at")
 
-  alerts        Alert[]
-  claims        Claim[]
-  accounts      Account[]
-  sessions      Session[]
+  alerts         Alert[]
+  claims         Claim[]
+  assignedClaims Claim[]   @relation("ClaimAssignee")
+  tasks          Task[]
+  contactLogs    ContactLog[]
+  accounts       Account[]
+  sessions       Session[]
 
   @@map("users")
 }
@@ -86,30 +153,47 @@ model Alert {
 }
 
 model Claim {
-  id          String          @id @default(cuid())
-  userId      String?         @map("user_id")
-  countyName  String          @map("county_name")
-  state       String          @db.VarChar(2)
-  ownerName   String          @map("owner_name")
-  propertyAddr String?        @map("property_addr")
-  parcelId    String?         @map("parcel_id")
-  amount      Float?
-  status      String          @default("research") // research, contacted, docs_gathering, filed, approved, paid, denied
-  priority    String          @default("medium")    // low, medium, high
-  notes       String?         @db.Text
-  filedDate   DateTime?       @map("filed_date")
-  deadlineDate DateTime?      @map("deadline_date")
-  paidDate    DateTime?       @map("paid_date")
-  paidAmount  Float?          @map("paid_amount")
-  createdAt   DateTime        @default(now()) @map("created_at")
-  updatedAt   DateTime        @updatedAt @map("updated_at")
+  id            String          @id @default(cuid())
+  userId        String?         @map("user_id")
+  countyName    String          @map("county_name")
+  state         String          @db.VarChar(2)
+  ownerName     String          @map("owner_name")
+  propertyAddr  String?         @map("property_addr")
+  parcelId      String?         @map("parcel_id")
+  amount        Float?
+  status        String          @default("research") // research, contacted, docs_gathering, filed, approved, paid, denied, court_petition, hearing_scheduled
+  priority      String          @default("medium")
+  notes         String?         @db.Text
+  filedDate     DateTime?       @map("filed_date")
+  deadlineDate  DateTime?       @map("deadline_date")
+  paidDate      DateTime?       @map("paid_date")
+  paidAmount    Float?          @map("paid_amount")
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
 
-  user        User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
-  activities  ClaimActivity[]
+  surplusType   SurplusType     @default(TAX_SALE) @map("surplus_type")
+  feePercent    Float?          @map("fee_percent")
+  leadId        String?         @unique @map("lead_id")
+  claimantId    String?         @map("claimant_id")
+  assigneeId    String?         @map("assignee_id")
+  requiresCourt Boolean         @default(false) @map("requires_court")
+  courtCaseNum  String?         @map("court_case_num")
+  hearingDate   DateTime?       @map("hearing_date")
+
+  user          User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  assignee      User?           @relation("ClaimAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  activities    ClaimActivity[]
+  lead          SurplusLead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  claimant      Claimant?       @relation(fields: [claimantId], references: [id], onDelete: SetNull)
+  tasks         Task[]
+  agreements    Agreement[]
+  contactLogs   ContactLog[]
 
   @@index([userId])
+  @@index([assigneeId])
   @@index([status])
   @@index([state])
+  @@index([claimantId])
   @@map("claims")
 }
 
@@ -126,21 +210,158 @@ model ClaimActivity {
   @@map("claim_activities")
 }
 
+model SurplusLead {
+  id            String       @id @default(cuid())
+  fundsListId   String?      @map("funds_list_id")
+  countyId      String       @map("county_id")
+  ownerName     String       @map("owner_name")
+  parcelId      String?      @map("parcel_id")
+  propertyAddr  String?      @map("property_addr")
+  surplusAmount Float?       @map("surplus_amount")
+  saleDate      DateTime?    @map("sale_date")
+  deadlineDate  DateTime?    @map("deadline_date")
+  surplusType   SurplusType  @default(TAX_SALE) @map("surplus_type")
+  status        LeadStatus   @default(NEW)
+  score         Int          @default(0)
+  enriched      Boolean      @default(false)
+  notes         String?      @db.Text
+  source        String?      @map("source")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  county        County       @relation(fields: [countyId], references: [id], onDelete: Cascade)
+  fundsList     FundsList?   @relation(fields: [fundsListId], references: [id], onDelete: SetNull)
+  claimants     Claimant[]
+  claim         Claim?
+  tasks         Task[]
+
+  @@unique([parcelId, countyId])
+  @@index([countyId])
+  @@index([status])
+  @@index([score])
+  @@index([deadlineDate])
+  @@index([ownerName])
+  @@map("surplus_leads")
+}
+
+model Claimant {
+  id              String        @id @default(cuid())
+  leadId          String?       @map("lead_id")
+  fullName        String        @map("full_name")
+  phone           String?
+  altPhone        String?       @map("alt_phone")
+  email           String?
+  address         String?
+  city            String?
+  state           String?       @db.VarChar(2)
+  zip             String?
+  relationship    String?
+  skipTraced      Boolean       @default(false) @map("skip_traced")
+  skipTraceSource String?       @map("skip_trace_source")
+  verified        Boolean       @default(false)
+  notes           String?       @db.Text
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  lead            SurplusLead?  @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  claims          Claim[]
+  contactLogs     ContactLog[]
+  agreements      Agreement[]
+
+  @@index([leadId])
+  @@index([fullName])
+  @@index([email])
+  @@map("claimants")
+}
+
+model Task {
+  id          String       @id @default(cuid())
+  claimId     String?      @map("claim_id")
+  leadId      String?      @map("lead_id")
+  assigneeId  String?      @map("assignee_id")
+  type        TaskType
+  title       String
+  dueDate     DateTime?    @map("due_date")
+  completedAt DateTime?    @map("completed_at")
+  priority    String       @default("medium")
+  notes       String?      @db.Text
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  claim       Claim?       @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  lead        SurplusLead? @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  assignee    User?        @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
+
+  @@index([claimId])
+  @@index([leadId])
+  @@index([assigneeId])
+  @@index([dueDate])
+  @@map("tasks")
+}
+
+model Agreement {
+  id            String           @id @default(cuid())
+  claimId       String           @map("claim_id")
+  claimantId    String?          @map("claimant_id")
+  type          AgreementType
+  status        AgreementStatus  @default(DRAFT)
+  feePercent    Float?           @map("fee_percent")
+  renderedText  String?          @map("rendered_text") @db.Text
+  pdfUrl        String?          @map("pdf_url")
+  eSignUrl      String?          @map("e_sign_url")
+  eSignProvider String?          @map("e_sign_provider")
+  externalId    String?          @map("external_id")
+  sentAt        DateTime?        @map("sent_at")
+  viewedAt      DateTime?        @map("viewed_at")
+  signedAt      DateTime?        @map("signed_at")
+  createdAt     DateTime         @default(now()) @map("created_at")
+
+  claim         Claim            @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  claimant      Claimant?        @relation(fields: [claimantId], references: [id], onDelete: SetNull)
+
+  @@index([claimId])
+  @@index([claimantId])
+  @@index([status])
+  @@map("agreements")
+}
+
+model ContactLog {
+  id          String          @id @default(cuid())
+  claimantId  String?         @map("claimant_id")
+  claimId     String?         @map("claim_id")
+  userId      String?         @map("user_id")
+  channel     ContactChannel
+  direction   String          @default("outbound")
+  status      String?
+  notes       String?         @db.Text
+  duration    Int?
+  externalId  String?         @map("external_id")
+  createdAt   DateTime        @default(now()) @map("created_at")
+
+  claimant    Claimant?       @relation(fields: [claimantId], references: [id], onDelete: SetNull)
+  claim       Claim?          @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  user        User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([claimantId])
+  @@index([claimId])
+  @@index([userId])
+  @@map("contact_logs")
+}
+
 model UnclaimedProperty {
-  id            String   @id @default(cuid())
-  state         String   @db.VarChar(2)
-  ownerName     String   @map("owner_name")
-  propertyType  String   @map("property_type")   // cash, securities, safe_deposit, insurance, wages, utility, other
-  reportedAmount Float?  @map("reported_amount")
-  holderName    String?  @map("holder_name")      // bank, company, etc. that reported it
-  address       String?
-  city          String?
-  zip           String?
-  reportedDate  String?  @map("reported_date")
-  sourceUrl     String?  @map("source_url")
-  externalId    String?  @map("external_id")      // ID from state portal
-  lastScraped   DateTime @default(now()) @map("last_scraped")
-  createdAt     DateTime @default(now()) @map("created_at")
+  id             String   @id @default(cuid())
+  state          String   @db.VarChar(2)
+  ownerName      String   @map("owner_name")
+  propertyType   String   @map("property_type")
+  reportedAmount Float?   @map("reported_amount")
+  holderName     String?  @map("holder_name")
+  address        String?
+  city           String?
+  zip            String?
+  reportedDate   String?  @map("reported_date")
+  sourceUrl      String?  @map("source_url")
+  externalId     String?  @map("external_id")
+  lastScraped    DateTime @default(now()) @map("last_scraped")
+  createdAt      DateTime @default(now()) @map("created_at")
 
   @@index([state])
   @@index([ownerName])

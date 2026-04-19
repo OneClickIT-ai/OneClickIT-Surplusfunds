@@ -1,99 +1,32 @@
-"use client";
+import { getServerSession } from "next-auth";
+import { redirect, notFound } from "next/navigation";
 
-import { useCallback, useEffect, useState } from "react";
+import { authOptions } from "@/lib/auth";
+import {
+  getCaseById,
+  getCaseTimeline,
+} from "@/modules/cases/server/service";
+import { StatusUpdater } from "./StatusUpdater";
 
-type CaseDetail = {
-  id: string;
-  ownerName: string;
-  countyName: string;
-  state: string;
-  propertyAddr: string | null;
-  parcelId: string | null;
-  amount: number | null;
-  status: string;
-  priority: string;
-  notes: string | null;
-  deadlineDate: string | null;
-  claimant?: {
-    fullName?: string | null;
-    phone?: string | null;
-    email?: string | null;
-  } | null;
-  activities: Array<{ id: string; type: string; message: string; createdAt: string }>;
-  tasks: Array<{
-    id: string;
-    title: string;
-    type: string;
-    dueDate: string | null;
-    completedAt: string | null;
-  }>;
-  agreements: Array<{
-    id: string;
-    type: string;
-    status: string;
-    createdAt: string;
-  }>;
-};
+export const dynamic = "force-dynamic";
 
-type TimelineEntry = {
-  id: string;
-  at: string;
-  kind: "activity" | "task" | "agreement" | "contact";
-  title: string;
-  body: string;
-  status?: string | null;
-};
-
-// Next 14: params is a synchronous object, not a Promise.
-export default function CaseDetailPage({
+export default async function CaseDetailPage({
   params,
 }: {
   params: { caseId: string };
 }) {
-  const { caseId } = params;
-  const [detail, setDetail] = useState<CaseDetail | null>(null);
-  const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [statusValue, setStatusValue] = useState("research");
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) redirect("/auth/signin");
 
-  const loadTimeline = useCallback(async () => {
-    const res = await fetch(`/api/v1/cases/${caseId}/timeline`, { cache: "no-store" });
-    const json = await res.json();
-    if (res.ok) setTimeline(json.data.timeline ?? []);
-  }, [caseId]);
+  const actor = { userId: session.user.id, role: session.user.role };
 
-  useEffect(() => {
-    async function load() {
-      setLoading(true);
-      const [detailRes] = await Promise.all([
-        fetch(`/api/v1/cases/${caseId}`, { cache: "no-store" }),
-        loadTimeline(),
-      ]);
-      const detailJson = await detailRes.json();
-      if (detailRes.ok) {
-        setDetail(detailJson.data);
-        setStatusValue(detailJson.data.status);
-      }
-      setLoading(false);
-    }
-    void load();
-  }, [caseId, loadTimeline]);
+  const [detail, timelineResult] = await Promise.all([
+    getCaseById(params.caseId, actor),
+    getCaseTimeline(params.caseId, actor),
+  ]);
 
-  async function updateStatus() {
-    const res = await fetch(`/api/v1/cases/${caseId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: statusValue }),
-    });
-    if (res.ok) {
-      const json = await res.json();
-      setDetail(json.data);
-      await loadTimeline();
-    }
-  }
-
-  if (loading) return <div className="p-6 text-sm text-zinc-500">Loading case...</div>;
-  if (!detail) return <div className="p-6 text-sm text-red-600">Case not found.</div>;
+  if (!detail) notFound();
+  const timeline = timelineResult?.timeline ?? [];
 
   return (
     <main className="p-6 space-y-6">
@@ -129,30 +62,7 @@ export default function CaseDetailPage({
             </div>
           </div>
 
-          <div className="flex gap-2">
-            <select
-              value={statusValue}
-              onChange={(e) => setStatusValue(e.target.value)}
-              className="rounded-lg border px-3 py-2 text-sm"
-            >
-              <option value="research">research</option>
-              <option value="contacted">contacted</option>
-              <option value="docs_gathering">docs_gathering</option>
-              <option value="filed">filed</option>
-              <option value="approved">approved</option>
-              <option value="paid">paid</option>
-              <option value="denied">denied</option>
-              <option value="court_petition">court_petition</option>
-              <option value="hearing_scheduled">hearing_scheduled</option>
-            </select>
-
-            <button
-              onClick={() => void updateStatus()}
-              className="rounded-lg bg-black px-4 py-2 text-sm text-white"
-            >
-              Update
-            </button>
-          </div>
+          <StatusUpdater caseId={detail.id} current={detail.status} />
         </div>
       </div>
 
@@ -182,7 +92,6 @@ export default function CaseDetailPage({
                 <dd>{detail.claimant?.email ?? "—"}</dd>
               </div>
             </dl>
-
             {detail.notes ? (
               <div className="mt-4">
                 <h3 className="text-sm font-medium">Notes</h3>
@@ -221,10 +130,7 @@ export default function CaseDetailPage({
             <h2 className="text-lg font-semibold">Tasks</h2>
             <div className="mt-4 space-y-3">
               {detail.tasks.map((task) => (
-                <div
-                  key={task.id}
-                  className="rounded-xl border bg-zinc-50 p-3 text-sm"
-                >
+                <div key={task.id} className="rounded-xl border bg-zinc-50 p-3 text-sm">
                   <div className="font-medium">{task.title}</div>
                   <div className="text-zinc-500">
                     {task.type} ·{" "}

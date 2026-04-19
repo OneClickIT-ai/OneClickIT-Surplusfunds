@@ -1,19 +1,11 @@
-"use client";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { authOptions } from "@/lib/auth";
+import { listCases } from "@/modules/cases/server/service";
+import { StageButtons } from "./StageButtons";
 
-type CaseItem = {
-  id: string;
-  ownerName: string;
-  countyName: string;
-  state: string;
-  amount: number | null;
-  deadlineDate: string | null;
-  status: string;
-  priority: string;
-  surplusType: string;
-  assignee?: { name?: string | null } | null;
-};
+export const dynamic = "force-dynamic";
 
 const columns = [
   { key: "research", label: "New / Research" },
@@ -24,51 +16,21 @@ const columns = [
   { key: "paid", label: "Paid" },
 ];
 
-export default function CRMPage() {
-  const [items, setItems] = useState<CaseItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export default async function CRMPage() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) redirect("/auth/signin");
 
-  const loadCases = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/v1/cases?limit=100", { cache: "no-store" });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Failed to load cases");
-      setItems(json.data ?? []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load cases");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const { data: items } = await listCases(
+    { page: 1, limit: 100 },
+    { userId: session.user.id, role: session.user.role },
+  );
 
-  useEffect(() => {
-    void loadCases();
-  }, [loadCases]);
-
-  async function moveCase(id: string, status: string) {
-    const res = await fetch(`/api/v1/cases/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
-    });
-    if (res.ok) await loadCases();
+  const grouped = new Map<string, typeof items>();
+  for (const col of columns) grouped.set(col.key, []);
+  for (const item of items) {
+    if (!grouped.has(item.status)) grouped.set(item.status, []);
+    grouped.get(item.status)!.push(item);
   }
-
-  const grouped = useMemo(() => {
-    const map = new Map<string, CaseItem[]>();
-    for (const col of columns) map.set(col.key, []);
-    for (const item of items) {
-      if (!map.has(item.status)) map.set(item.status, []);
-      map.get(item.status)!.push(item);
-    }
-    return map;
-  }, [items]);
-
-  if (loading) return <div className="p-6 text-sm text-zinc-500">Loading pipeline...</div>;
-  if (error) return <div className="p-6 text-sm text-red-600">{error}</div>;
 
   return (
     <main className="p-6 space-y-6">
@@ -91,7 +53,10 @@ export default function CRMPage() {
 
             <div className="space-y-3">
               {(grouped.get(column.key) ?? []).map((item) => (
-                <article key={item.id} className="rounded-xl border bg-zinc-50 p-3 space-y-2">
+                <article
+                  key={item.id}
+                  className="rounded-xl border bg-zinc-50 p-3 space-y-2"
+                >
                   <div>
                     <h3 className="font-medium">{item.ownerName}</h3>
                     <p className="text-xs text-zinc-500">
@@ -124,18 +89,11 @@ export default function CRMPage() {
                   </div>
 
                   <div className="flex flex-wrap gap-2 pt-1">
-                    {columns
-                      .filter((c) => c.key !== item.status)
-                      .slice(0, 2)
-                      .map((next) => (
-                        <button
-                          key={next.key}
-                          onClick={() => void moveCase(item.id, next.key)}
-                          className="rounded-lg border px-2 py-1 text-xs hover:bg-zinc-100"
-                        >
-                          Move to {next.label}
-                        </button>
-                      ))}
+                    <StageButtons
+                      caseId={item.id}
+                      currentStatus={item.status}
+                      options={columns}
+                    />
                     <a
                       href={`/cases/${item.id}`}
                       className="rounded-lg bg-black px-2 py-1 text-xs text-white"

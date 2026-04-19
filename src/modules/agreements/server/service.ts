@@ -65,9 +65,27 @@ export async function listAgreements(
   return { data: items, page, limit, total, totalPages: Math.ceil(total / limit) };
 }
 
+const agreementDetailInclude = {
+  claim: {
+    select: {
+      id: true,
+      ownerName: true,
+      countyName: true,
+      state: true,
+      userId: true,
+      assigneeId: true,
+    },
+  },
+  claimant: true,
+} satisfies Prisma.AgreementInclude;
+
+export type AgreementDetail = Prisma.AgreementGetPayload<{
+  include: typeof agreementDetailInclude;
+}>;
+
 export type GetAgreementResult =
   | { notFound: true }
-  | { agreement: Awaited<ReturnType<typeof prisma.agreement.findFirst>> };
+  | { agreement: AgreementDetail };
 
 export async function getAgreement(
   id: string,
@@ -75,19 +93,7 @@ export async function getAgreement(
 ): Promise<GetAgreementResult> {
   const agreement = await prisma.agreement.findFirst({
     where: mergeWhere(visibilityScope(actor), { id }),
-    include: {
-      claim: {
-        select: {
-          id: true,
-          ownerName: true,
-          countyName: true,
-          state: true,
-          userId: true,
-          assigneeId: true,
-        },
-      },
-      claimant: true,
-    },
+    include: agreementDetailInclude,
   });
   if (!agreement) return { notFound: true };
   return { agreement };

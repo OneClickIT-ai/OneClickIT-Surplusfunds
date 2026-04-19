@@ -2,8 +2,18 @@ import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
 import type { LeadsQueryInput } from "../schemas";
 
+const leadListInclude = {
+  county: { select: { id: true, name: true, state: true } },
+  claimants: true,
+  claim: { select: { id: true, status: true } },
+} satisfies Prisma.SurplusLeadInclude;
+
+export type LeadListItem = Prisma.SurplusLeadGetPayload<{
+  include: typeof leadListInclude;
+}>;
+
 export interface LeadsListResult {
-  data: Awaited<ReturnType<typeof prisma.surplusLead.findMany>>;
+  data: LeadListItem[];
   page: number;
   limit: number;
   total: number;
@@ -47,11 +57,7 @@ export async function listLeads(input: LeadsQueryInput): Promise<LeadsListResult
   const [items, total] = await Promise.all([
     prisma.surplusLead.findMany({
       where,
-      include: {
-        county: { select: { id: true, name: true, state: true } },
-        claimants: true,
-        claim: { select: { id: true, status: true } },
-      },
+      include: leadListInclude,
       orderBy: [{ score: "desc" }, { createdAt: "desc" }],
       skip,
       take: limit,

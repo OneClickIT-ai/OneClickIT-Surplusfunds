@@ -1,20 +1,12 @@
-"use client";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 
-import { useCallback, useEffect, useState } from "react";
+import { authOptions } from "@/lib/auth";
+import { listAgreements } from "@/modules/agreements/server/service";
 
-type Agreement = {
-  id: string;
-  type: "ENGAGEMENT" | "ASSIGNMENT" | "FEE_DISCLOSURE";
-  status: "DRAFT" | "SENT" | "VIEWED" | "SIGNED" | "DECLINED" | "EXPIRED";
-  feePercent: number | null;
-  sentAt: string | null;
-  signedAt: string | null;
-  createdAt: string;
-  claim: { id: string; ownerName: string; countyName: string; state: string };
-  claimant?: { id: string; fullName: string; email: string | null } | null;
-};
+export const dynamic = "force-dynamic";
 
-const STATUS_COLORS: Record<Agreement["status"], string> = {
+const STATUS_COLORS: Record<string, string> = {
   DRAFT: "bg-zinc-100 text-zinc-700",
   SENT: "bg-blue-100 text-blue-700",
   VIEWED: "bg-indigo-100 text-indigo-700",
@@ -23,34 +15,18 @@ const STATUS_COLORS: Record<Agreement["status"], string> = {
   EXPIRED: "bg-amber-100 text-amber-700",
 };
 
-export default function AgreementsPage() {
-  const [items, setItems] = useState<Agreement[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export default async function AgreementsPage() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) redirect("/auth/signin");
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/v1/agreements?limit=100", {
-        cache: "no-store",
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Failed to load");
-      setItems(json.data ?? []);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
-
-  if (loading) return <div className="p-6 text-sm text-zinc-500">Loading…</div>;
-  if (error) return <div className="p-6 text-sm text-red-600">{error}</div>;
+  const { data: items } = await listAgreements(
+    { page: 1, limit: 100 },
+    {
+      userId: session.user.id,
+      role: session.user.role,
+      name: session.user.name ?? "Agent",
+    },
+  );
 
   return (
     <main className="p-6 space-y-6">
@@ -80,7 +56,10 @@ export default function AgreementsPage() {
               <tr key={a.id}>
                 <td className="px-4 py-3 font-medium">{a.type}</td>
                 <td className="px-4 py-3">
-                  <a href={`/cases/${a.claim.id}`} className="text-blue-700 hover:underline">
+                  <a
+                    href={`/cases/${a.claim.id}`}
+                    className="text-blue-700 hover:underline"
+                  >
                     {a.claim.ownerName}
                   </a>
                   <div className="text-xs text-zinc-500">
@@ -97,7 +76,9 @@ export default function AgreementsPage() {
                   {a.feePercent != null ? `${a.feePercent}%` : "—"}
                 </td>
                 <td className="px-4 py-3">
-                  <span className={`rounded-full px-2 py-0.5 text-xs ${STATUS_COLORS[a.status]}`}>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs ${STATUS_COLORS[a.status] ?? ""}`}
+                  >
                     {a.status}
                   </span>
                 </td>

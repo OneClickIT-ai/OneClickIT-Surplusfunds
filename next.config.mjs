@@ -37,6 +37,8 @@ export default withSentryConfig(nextConfig, {
   org: "oneclickit",
   project: "surplusfunds",
   widenClientFileUpload: true,
-  disableLogger: true,
-  automaticVercelMonitors: false,
+  webpack: {
+    treeshake: { removeDebugLogging: true },
+    automaticVercelMonitors: false,
+  },
 });

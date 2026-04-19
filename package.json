@@ -15,9 +15,6 @@
     "test:unit": "vitest run",
     "test:unit:watch": "vitest"
   },
-  "prisma": {
-    "seed": "npx tsx prisma/seed.ts"
-  },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",
     "@prisma/client": "^6.19.3",

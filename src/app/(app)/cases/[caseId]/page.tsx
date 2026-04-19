@@ -7,6 +7,7 @@ import {
   getCaseTimeline,
 } from "@/modules/cases/server/service";
 import { StatusUpdater } from "./StatusUpdater";
+import { PortalLinkAction } from "./PortalLinkAction";
 
 export const dynamic = "force-dynamic";
 
@@ -63,6 +64,13 @@ export default async function CaseDetailPage({
           </div>
 
           <StatusUpdater caseId={detail.id} current={detail.status} />
+
+          <div className="border-t pt-3">
+            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-zinc-500">
+              Claimant portal
+            </p>
+            <PortalLinkAction caseId={detail.id} />
+          </div>
         </div>
       </div>
 

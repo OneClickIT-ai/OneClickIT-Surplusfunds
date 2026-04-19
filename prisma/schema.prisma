@@ -188,6 +188,7 @@ model Claim {
   tasks         Task[]
   agreements    Agreement[]
   contactLogs   ContactLog[]
+  portalTokens  PortalToken[]
 
   @@index([userId])
   @@index([assigneeId])
@@ -267,6 +268,7 @@ model Claimant {
   claims          Claim[]
   contactLogs     ContactLog[]
   agreements      Agreement[]
+  portalTokens    PortalToken[]
 
   @@index([leadId])
   @@index([fullName])
@@ -322,6 +324,25 @@ model Agreement {
   @@index([claimantId])
   @@index([status])
   @@map("agreements")
+}
+
+model PortalToken {
+  id           String    @id @default(cuid())
+  token        String    @unique
+  claimId      String    @map("claim_id")
+  claimantId   String?   @map("claimant_id")
+  expiresAt    DateTime  @map("expires_at")
+  revokedAt    DateTime? @map("revoked_at")
+  lastViewedAt DateTime? @map("last_viewed_at")
+  viewCount    Int       @default(0) @map("view_count")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  claim        Claim     @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  claimant     Claimant? @relation(fields: [claimantId], references: [id], onDelete: SetNull)
+
+  @@index([claimId])
+  @@index([expiresAt])
+  @@map("portal_tokens")
 }
 
 model ContactLog {

@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 interface RouteContext {
-  params: { token: string };
+  params: Promise<{ token: string }>;
 }
 
 /**
@@ -22,7 +22,7 @@ interface RouteContext {
  */
 export async function GET(request: NextRequest, context: RouteContext) {
   try {
-    const token = context.params.token;
+    const { token } = await context.params;
     const rl = rateLimit(`portal:${token}`, 60, 60_000);
     if (!rl.success) {
       return NextResponse.json({ error: "rate limit" }, { status: 429 });

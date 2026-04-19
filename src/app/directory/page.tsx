@@ -20,19 +20,21 @@ export const metadata: Metadata = {
 };
 import Badge from '@/components/ui/Badge';
 
+type SearchParams = {
+  q?: string;
+  state?: string;
+  minPop?: string;
+  maxPop?: string;
+  page?: string;
+};
+
 interface PageProps {
-  searchParams: {
-    q?: string;
-    state?: string;
-    minPop?: string;
-    maxPop?: string;
-    page?: string;
-  };
+  searchParams: Promise<SearchParams>;
 }
 
 const LIMIT = 25;
 
-async function getCounties(params: PageProps['searchParams']) {
+async function getCounties(params: SearchParams) {
   const page = parseInt(params.page || '1');
   const skip = (page - 1) * LIMIT;
 
@@ -67,7 +69,8 @@ function formatPop(n: number) {
 }
 
 export default async function DirectoryPage({ searchParams }: PageProps) {
-  const { counties, total, page, totalPages } = await getCounties(searchParams);
+  const resolvedParams = await searchParams;
+  const { counties, total, page, totalPages } = await getCounties(resolvedParams);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -144,7 +147,7 @@ export default async function DirectoryPage({ searchParams }: PageProps) {
           <div className="flex gap-2">
             {page > 1 && (
               <Link
-                href={`/directory?${new URLSearchParams({ ...searchParams, page: String(page - 1) })}`}
+                href={`/directory?${new URLSearchParams({ ...resolvedParams, page: String(page - 1) })}`}
                 className="rounded-lg border border-gray-300 px-3 py-1.5 hover:bg-gray-50"
               >
                 Previous
@@ -152,7 +155,7 @@ export default async function DirectoryPage({ searchParams }: PageProps) {
             )}
             {page < totalPages && (
               <Link
-                href={`/directory?${new URLSearchParams({ ...searchParams, page: String(page + 1) })}`}
+                href={`/directory?${new URLSearchParams({ ...resolvedParams, page: String(page + 1) })}`}
                 className="rounded-lg border border-gray-300 px-3 py-1.5 hover:bg-gray-50"
               >
                 Next

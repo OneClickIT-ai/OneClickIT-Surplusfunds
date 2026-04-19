@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 interface RouteContext {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 /**
@@ -27,7 +27,8 @@ export async function GET(_: NextRequest, context: RouteContext) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  const result = await getAgreement(context.params.id, {
+  const { id } = await context.params;
+  const result = await getAgreement(id, {
     userId: session.user.id,
     role: session.user.role,
     name: session.user.name ?? "Agent",

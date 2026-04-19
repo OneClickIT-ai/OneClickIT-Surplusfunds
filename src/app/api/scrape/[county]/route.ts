@@ -6,7 +6,7 @@ import { scrapeCounty } from '@/lib/scraper';
 import { ok, err, handleError } from '@/lib/api-utils';
 import { rateLimit } from '@/lib/rate-limit';
 
-export async function POST(_req: NextRequest, { params }: { params: { county: string } }) {
+export async function POST(_req: NextRequest, { params }: { params: Promise<{ county: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) return err('Unauthorized', 401);
@@ -16,7 +16,8 @@ export async function POST(_req: NextRequest, { params }: { params: { county: st
       return err('Too many requests. Please try again later.', 429);
     }
 
-    const county = await prisma.county.findUnique({ where: { id: params.county } });
+    const { county: countyId } = await params;
+    const county = await prisma.county.findUnique({ where: { id: countyId } });
     if (!county) return err('County not found', 404);
     if (!county.listUrl) return err('No list URL configured for this county', 400);
 

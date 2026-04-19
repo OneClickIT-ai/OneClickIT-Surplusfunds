@@ -5,10 +5,11 @@ import { prisma } from '@/lib/prisma';
 import { ok, err, handleError } from '@/lib/api-utils';
 import { countySchema } from '@/lib/validators';
 
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const county = await prisma.county.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { fundsLists: { orderBy: { scrapeDate: 'desc' }, take: 5 } },
     });
     if (!county) return err('County not found', 404);
@@ -18,8 +19,9 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (session?.user?.role !== 'admin') return err('Forbidden', 403);
 
@@ -27,7 +29,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const data = countySchema.partial().parse(body);
 
     const county = await prisma.county.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(data.rank !== undefined && { rank: data.rank }),
         ...(data.name !== undefined && { name: data.name }),
@@ -47,12 +49,13 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (session?.user?.role !== 'admin') return err('Forbidden', 403);
 
-    await prisma.county.delete({ where: { id: params.id } });
+    await prisma.county.delete({ where: { id } });
     return ok({ deleted: true });
   } catch (e) {
     return handleError(e);

@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 interface RouteContext {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export async function PATCH(request: NextRequest, context: RouteContext) {
@@ -20,7 +20,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
 
-    const { id } = context.params;
+    const { id } = await context.params;
     let body: unknown;
     try {
       body = await request.json();
@@ -57,7 +57,7 @@ export async function DELETE(_: NextRequest, context: RouteContext) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
-    const { id } = context.params;
+    const { id } = await context.params;
     const result = await deleteTask(id, {
       userId: session.user.id,
       role: session.user.role,

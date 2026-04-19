@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 interface RouteContext {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 function actorFrom(session: {
@@ -32,7 +32,8 @@ export async function GET(_: NextRequest, context: RouteContext) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
-    const result = await getAgreement(context.params.id, actorFrom(session));
+    const { id } = await context.params;
+    const result = await getAgreement(id, actorFrom(session));
     if ("notFound" in result) {
       return NextResponse.json({ error: "agreement not found" }, { status: 404 });
     }
@@ -61,8 +62,9 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         { status: 400 },
       );
     }
+    const { id } = await context.params;
     const result = await updateAgreement(
-      context.params.id,
+      id,
       parsed.data,
       actorFrom(session),
     );

@@ -12,9 +12,10 @@ export const dynamic = "force-dynamic";
 export default async function PortalPage({
   params,
 }: {
-  params: { token: string };
+  params: Promise<{ token: string }>;
 }) {
-  const resolved = await resolvePortalToken(params.token);
+  const { token } = await params;
+  const resolved = await resolvePortalToken(token);
   if (!resolved) notFound();
 
   const { claim } = resolved;
@@ -125,7 +126,7 @@ export default async function PortalPage({
                 ) : a.status === "SENT" || a.status === "VIEWED" ? (
                   <div className="rounded-lg border bg-zinc-50 p-4">
                     <SignForm
-                      token={params.token}
+                      token={token}
                       agreementId={a.id}
                       defaultName={claim.claimant?.fullName ?? claim.ownerName}
                     />

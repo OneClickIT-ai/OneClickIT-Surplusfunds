@@ -23,14 +23,10 @@ const goodClaim = {
 };
 
 const baseInput = {
-  channel: "CALL",
+  channel: "CALL" as const,
   direction: "outbound" as const,
   status: "answered",
-  notes: null,
-  duration: null,
-  externalId: null,
-  claimantId: null,
-};
+} satisfies Record<string, unknown>;
 
 describe("logContact", () => {
   beforeEach(() => {

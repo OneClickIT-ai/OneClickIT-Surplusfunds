@@ -1,4 +1,13 @@
-import { NextRequest } from 'next/server';
+/**
+ * @deprecated Use `/api/v1/cases/[id]` instead. This legacy endpoint is
+ * scheduled for removal after the next release cycle. It still works so
+ * existing clients aren't broken mid-migration, but every response now
+ * carries RFC 8594 `Deprecation` + `Sunset` headers and a `Link` header
+ * pointing at the replacement.
+ *
+ * Tracking issue: https://github.com/ritacsolutionsllc/OneClickIT-Surplusfunds/issues (open one)
+ */
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
@@ -6,6 +15,16 @@ import { ok, err, handleError } from '@/lib/api-utils';
 import { claimUpdateSchema } from '@/lib/validators';
 
 export const dynamic = 'force-dynamic';
+
+function withDeprecation(response: NextResponse, id: string): NextResponse {
+  response.headers.set('Deprecation', 'true');
+  response.headers.set('Sunset', 'Wed, 30 Apr 2026 00:00:00 GMT');
+  response.headers.set(
+    'Link',
+    `</api/v1/cases/${id}>; rel="successor-version"`,
+  );
+  return response;
+}
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -22,7 +41,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     if (claim.userId && claim.userId !== session.user.id && session.user.role !== 'admin') {
       return err('Forbidden', 403);
     }
-    return ok(claim);
+    return withDeprecation(ok(claim), id);
   } catch (error) {
     return handleError(error);
   }
@@ -70,7 +89,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       include: { activities: { orderBy: { createdAt: 'desc' } } },
     });
 
-    return ok(claim);
+    return withDeprecation(ok(claim), id);
   } catch (error) {
     return handleError(error);
   }
@@ -88,7 +107,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
       return err('Forbidden', 403);
     }
     await prisma.claim.delete({ where: { id } });
-    return ok({ deleted: true });
+    return withDeprecation(ok({ deleted: true }), id);
   } catch (error) {
     return handleError(error);
   }

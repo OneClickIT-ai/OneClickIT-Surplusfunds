@@ -1,8 +1,11 @@
 /**
- * Sentry client-side init.
+ * Sentry client-side init (Sentry SDK v8+).
  *
- * Runs in the browser. Keep sample rates conservative to stay under the
- * default org quota — we can bump these once we see real traffic shape.
+ * Next.js auto-loads this file on the browser side when it lives at
+ * `src/instrumentation-client.ts`, replacing the legacy
+ * `sentry.client.config.ts` location.
+ *
+ * Sample rates are conservative — bump once we see real traffic shape.
  */
 import * as Sentry from "@sentry/nextjs";
 
@@ -25,3 +28,6 @@ Sentry.init({
     "Non-Error promise rejection captured",
   ],
 });
+
+// Sentry v8+: forward client-side navigation start markers for Web Vitals.
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

@@ -79,9 +79,11 @@ export async function logContact(
   });
 
   let followUpTaskId: string | null = null;
+  const direction: "outbound" | "inbound" =
+    contactLog.direction === "inbound" ? "inbound" : "outbound";
   const shouldFollowUp = isFailedContactStatus({
     channel: contactLog.channel,
-    direction: contactLog.direction === "inbound" ? "inbound" : "outbound",
+    direction,
     status: contactLog.status,
   });
   if (shouldFollowUp) {
@@ -90,7 +92,7 @@ export async function logContact(
         claimId,
         contactLogId: contactLog.id,
         channel: contactLog.channel,
-        direction: "outbound",
+        direction,
         status: contactLog.status,
         assigneeId: gate.assigneeId ?? gate.ownerId ?? actor.userId,
       });

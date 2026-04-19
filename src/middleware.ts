@@ -19,6 +19,7 @@ export const config = {
     '/cases/:path*',
     '/tasks/:path*',
     '/agreements/:path*',
+    '/insights/:path*',
     '/osint/:path*',
     '/dorks/:path*',
     '/settings/:path*',

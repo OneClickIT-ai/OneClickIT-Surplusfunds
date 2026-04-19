@@ -68,7 +68,11 @@ export async function POST(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "forbidden" }, { status: 403 });
     }
     return NextResponse.json(
-      { success: true, data: result.contactLog },
+      {
+        success: true,
+        data: result.contactLog,
+        followUpTaskCreated: result.followUpTaskCreated,
+      },
       { status: 201 },
     );
   } catch (e) {

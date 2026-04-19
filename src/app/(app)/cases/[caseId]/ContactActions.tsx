@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { CONTACT_STATUS_OPTIONS } from "@/modules/outbound/follow-up";
+
 const CHANNELS = [
   { key: "CALL", label: "Call" },
   { key: "SMS", label: "SMS" },
@@ -18,6 +20,10 @@ type Direction = "outbound" | "inbound";
  * Quick-log panel for a contact attempt. Sends straight to
  * POST /api/v1/cases/:id/contacts, then refreshes the RSC so the new log
  * appears in the timeline + contact list immediately.
+ *
+ * If the server auto-seeds a follow-up task (because the status maps to a
+ * failed attempt), we surface that as a toast so operators know without
+ * needing to scan the task list.
  */
 export function ContactActions({ caseId }: { caseId: string }) {
   const router = useRouter();
@@ -28,11 +34,13 @@ export function ContactActions({ caseId }: { caseId: string }) {
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError(null);
+    setToast(null);
     try {
       const body: Record<string, unknown> = { channel, direction };
       if (status.trim()) body.status = status.trim();
@@ -53,6 +61,11 @@ export function ContactActions({ caseId }: { caseId: string }) {
       setStatus("");
       setDuration("");
       setNotes("");
+      if (json.followUpTaskCreated) {
+        setToast("Follow-up task scheduled");
+      } else {
+        setToast("Contact logged");
+      }
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "log failed");
@@ -61,8 +74,14 @@ export function ContactActions({ caseId }: { caseId: string }) {
     }
   }
 
-  // Only Call channels typically care about duration; show it contextually.
+  function pickChannel(next: Channel) {
+    setChannel(next);
+    // Reset status so stale options from the previous channel don't stick.
+    setStatus("");
+  }
+
   const showDuration = channel === "CALL";
+  const statusOptions = CONTACT_STATUS_OPTIONS[channel] ?? [];
 
   return (
     <form onSubmit={submit} className="space-y-3">
@@ -71,7 +90,7 @@ export function ContactActions({ caseId }: { caseId: string }) {
           <button
             key={c.key}
             type="button"
-            onClick={() => setChannel(c.key)}
+            onClick={() => pickChannel(c.key)}
             className={`rounded-full px-3 py-1 text-xs ${
               channel === c.key
                 ? "bg-black text-white"
@@ -102,6 +121,23 @@ export function ContactActions({ caseId }: { caseId: string }) {
         </label>
       </div>
 
+      <div className="flex flex-wrap gap-1.5">
+        {statusOptions.map((opt) => (
+          <button
+            key={opt}
+            type="button"
+            onClick={() => setStatus(opt === status ? "" : opt)}
+            className={`rounded-full px-2.5 py-0.5 text-[11px] ${
+              status === opt
+                ? "bg-zinc-900 text-white"
+                : "border bg-white text-zinc-600 hover:bg-zinc-50"
+            }`}
+          >
+            {opt.replace(/_/g, " ")}
+          </button>
+        ))}
+      </div>
+
       <div className="grid gap-2 sm:grid-cols-2">
         <label className="block text-xs">
           <span className="mb-1 block text-zinc-500">Result</span>
@@ -109,13 +145,7 @@ export function ContactActions({ caseId }: { caseId: string }) {
             type="text"
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            placeholder={
-              channel === "CALL"
-                ? "e.g. answered, voicemail"
-                : channel === "EMAIL"
-                  ? "e.g. sent, bounced"
-                  : "e.g. delivered"
-            }
+            placeholder="custom result…"
             className="w-full rounded-lg border px-2 py-1.5 text-sm"
           />
         </label>
@@ -147,6 +177,11 @@ export function ContactActions({ caseId }: { caseId: string }) {
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-2 text-xs text-red-700">
           {error}
+        </div>
+      )}
+      {toast && !error && (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-2 text-xs text-emerald-700">
+          {toast}
         </div>
       )}
 

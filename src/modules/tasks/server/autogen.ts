@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
-import type { TaskType } from "@prisma/client";
+import type { ContactChannel, TaskType } from "@prisma/client";
+
+import { followUpTitle } from "@/modules/outbound/server/follow-up";
 
 /**
  * Internal helpers that seed tasks in response to workflow events.
@@ -51,6 +53,46 @@ export async function seedCaseKickoffTasks(
       notes: `Initial outreach after case created.\n${marker}`,
     },
   });
+}
+
+/**
+ * Seed a FOLLOW_UP task when an outbound contact attempt failed (voicemail,
+ * bounce, no-answer, etc). Idempotent per contact-log row so that retries of
+ * the same log don't spam duplicate tasks.
+ *
+ * Returns true when a task was inserted, false when one already exists.
+ */
+export async function seedContactFollowUpTask(params: {
+  claimId: string;
+  assigneeId: string | null;
+  contactLogId: string;
+  channel: ContactChannel;
+  status: string | null;
+}): Promise<boolean> {
+  const marker = `[followup:contact:${params.contactLogId}]`;
+  if (await taskExistsWithMarker(params.claimId, marker)) return false;
+
+  const taskType: TaskType =
+    params.channel === "EMAIL"
+      ? "EMAIL"
+      : params.channel === "SMS"
+        ? "SMS"
+        : params.channel === "CALL"
+          ? "CALL"
+          : "FOLLOW_UP";
+
+  await prisma.task.create({
+    data: {
+      claimId: params.claimId,
+      assigneeId: params.assigneeId,
+      type: taskType,
+      title: followUpTitle(params.channel, params.status),
+      dueDate: daysFromNow(1),
+      priority: "medium",
+      notes: `Auto-created after failed ${params.channel.toLowerCase()} attempt (status: ${params.status ?? "unknown"}).\n${marker}`,
+    },
+  });
+  return true;
 }
 
 /**

@@ -1,10 +1,13 @@
 import { prisma } from "@/lib/prisma";
 import type { ContactChannel, Prisma } from "@prisma/client";
 
+import { seedContactFollowUpTask } from "@/modules/tasks/server/autogen";
+
 import type {
   CreateContactLogInput,
   UpdateContactLogInput,
 } from "../schemas";
+import { shouldScheduleFollowUp } from "./follow-up";
 
 export interface ActorContext {
   userId: string;
@@ -15,7 +18,10 @@ export interface ActorContext {
 async function canActOnClaim(
   claimId: string,
   actor: ActorContext,
-): Promise<{ ok: true; claimantId: string | null } | { ok: false; reason: "notFound" | "forbidden" }> {
+): Promise<
+  | { ok: true; claimantId: string | null; userId: string | null; assigneeId: string | null }
+  | { ok: false; reason: "notFound" | "forbidden" }
+> {
   const claim = await prisma.claim.findUnique({
     where: { id: claimId },
     select: { userId: true, assigneeId: true, claimantId: true },
@@ -28,13 +34,21 @@ async function canActOnClaim(
   ) {
     return { ok: false, reason: "forbidden" };
   }
-  return { ok: true, claimantId: claim.claimantId };
+  return {
+    ok: true,
+    claimantId: claim.claimantId,
+    userId: claim.userId,
+    assigneeId: claim.assigneeId,
+  };
 }
 
 export type CreateContactLogResult =
   | { notFound: true }
   | { forbidden: true }
-  | { contactLog: Awaited<ReturnType<typeof prisma.contactLog.create>> };
+  | {
+      contactLog: Awaited<ReturnType<typeof prisma.contactLog.create>>;
+      followUpCreated: boolean;
+    };
 
 /**
  * Log a contact against a case. Used by the operator-driven quick-log form
@@ -64,7 +78,30 @@ export async function logContact(
       externalId: input.externalId ?? null,
     },
   });
-  return { contactLog };
+
+  // Auto-seed a retry task when the outbound attempt failed to reach the
+  // claimant (voicemail, bounce, no-answer, ...). Best-effort: the contact
+  // log is the authoritative record, so never fail the outer call if task
+  // insert hiccups.
+  let followUpCreated = false;
+  if (
+    input.direction === "outbound" &&
+    shouldScheduleFollowUp(input.status ?? null)
+  ) {
+    try {
+      followUpCreated = await seedContactFollowUpTask({
+        claimId,
+        assigneeId: gate.assigneeId ?? gate.userId ?? actor.userId,
+        contactLogId: contactLog.id,
+        channel: contactLog.channel,
+        status: contactLog.status ?? null,
+      });
+    } catch (e) {
+      console.error("[contact-log] seedContactFollowUpTask failed", contactLog.id, e);
+    }
+  }
+
+  return { contactLog, followUpCreated };
 }
 
 export async function listContactLogsForClaim(

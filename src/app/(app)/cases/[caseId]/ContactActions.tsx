@@ -15,6 +15,19 @@ type Channel = (typeof CHANNELS)[number]["key"];
 type Direction = "outbound" | "inbound";
 
 /**
+ * Suggested result chips by channel. Tokens match the failure-classifier
+ * vocabulary in `modules/outbound/server/follow-up` so picking one of the
+ * "no-reach" chips auto-creates a FOLLOW_UP task server-side.
+ */
+const RESULT_CHIPS: Record<Channel, string[]> = {
+  CALL: ["answered", "voicemail", "no_answer", "busy", "wrong_number"],
+  SMS: ["delivered", "failed", "wrong_number", "no_response"],
+  EMAIL: ["sent", "bounced", "undeliverable", "no_response"],
+  MAIL: ["sent", "undeliverable", "returned"],
+  IN_PERSON: ["met", "no_answer", "left_note"],
+};
+
+/**
  * Quick-log panel for a contact attempt. Sends straight to
  * POST /api/v1/cases/:id/contacts, then refreshes the RSC so the new log
  * appears in the timeline + contact list immediately.
@@ -28,11 +41,13 @@ export function ContactActions({ caseId }: { caseId: string }) {
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [flash, setFlash] = useState<string | null>(null);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError(null);
+    setFlash(null);
     try {
       const body: Record<string, unknown> = { channel, direction };
       if (status.trim()) body.status = status.trim();
@@ -53,6 +68,11 @@ export function ContactActions({ caseId }: { caseId: string }) {
       setStatus("");
       setDuration("");
       setNotes("");
+      setFlash(
+        json?.followUpCreated
+          ? "Logged. Follow-up task scheduled for tomorrow."
+          : "Logged.",
+      );
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "log failed");
@@ -63,6 +83,7 @@ export function ContactActions({ caseId }: { caseId: string }) {
 
   // Only Call channels typically care about duration; show it contextually.
   const showDuration = channel === "CALL";
+  const chips = RESULT_CHIPS[channel];
 
   return (
     <form onSubmit={submit} className="space-y-3">
@@ -71,7 +92,10 @@ export function ContactActions({ caseId }: { caseId: string }) {
           <button
             key={c.key}
             type="button"
-            onClick={() => setChannel(c.key)}
+            onClick={() => {
+              setChannel(c.key);
+              setStatus("");
+            }}
             className={`rounded-full px-3 py-1 text-xs ${
               channel === c.key
                 ? "bg-black text-white"
@@ -118,6 +142,22 @@ export function ContactActions({ caseId }: { caseId: string }) {
             }
             className="w-full rounded-lg border px-2 py-1.5 text-sm"
           />
+          <div className="mt-1 flex flex-wrap gap-1">
+            {chips.map((chip) => (
+              <button
+                key={chip}
+                type="button"
+                onClick={() => setStatus(chip)}
+                className={`rounded-full border px-2 py-0.5 text-[10px] ${
+                  status === chip
+                    ? "border-black bg-black text-white"
+                    : "bg-white text-zinc-600 hover:bg-zinc-100"
+                }`}
+              >
+                {chip}
+              </button>
+            ))}
+          </div>
         </label>
         {showDuration && (
           <label className="block text-xs">
@@ -147,6 +187,11 @@ export function ContactActions({ caseId }: { caseId: string }) {
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-2 text-xs text-red-700">
           {error}
+        </div>
+      )}
+      {flash && !error && (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-2 text-xs text-emerald-700">
+          {flash}
         </div>
       )}
 

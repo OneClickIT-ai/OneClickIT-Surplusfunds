@@ -31,3 +31,30 @@ export const updateContactLogSchema = z.object({
 
 export type CreateContactLogInput = z.infer<typeof createContactLogSchema>;
 export type UpdateContactLogInput = z.infer<typeof updateContactLogSchema>;
+
+/**
+ * Schema for the real outbound send endpoint. SMS and EMAIL only — voice and
+ * in-person channels stay on the manual-log path. The service resolves
+ * recipient from the case's claimant; callers can override with `to` when
+ * the claimant record is stale.
+ */
+export const sendContactSchema = z
+  .object({
+    channel: z.enum(["SMS", "EMAIL"]),
+    body: z.preprocess(emptyToUndefined, z.string().min(1).max(5000)),
+    subject: z
+      .preprocess(emptyToUndefined, z.string().max(200).optional())
+      .optional(),
+    to: z
+      .preprocess(emptyToUndefined, z.string().max(200).optional())
+      .optional(),
+    notes: z
+      .preprocess(emptyToUndefined, z.string().max(2000).optional())
+      .optional(),
+  })
+  .refine(
+    (v) => v.channel !== "EMAIL" || (v.subject && v.subject.trim().length > 0),
+    { message: "subject is required for EMAIL", path: ["subject"] },
+  );
+
+export type SendContactInput = z.infer<typeof sendContactSchema>;

@@ -24,7 +24,7 @@ interface RouteContext {
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
     const { token } = await context.params;
-    const rl = rateLimit(`portal-sign:${token}`, 10, 60_000);
+    const rl = await rateLimit(`portal-sign:${token}`, 10, 60_000);
     if (!rl.success) {
       return NextResponse.json({ error: "rate limit" }, { status: 429 });
     }

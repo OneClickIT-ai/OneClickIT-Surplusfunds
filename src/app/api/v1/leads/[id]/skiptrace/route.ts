@@ -29,7 +29,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
 
-    const rl = rateLimit(`skiptrace:${session.user.id}`, 30, 5 * 60_000);
+    const rl = await rateLimit(`skiptrace:${session.user.id}`, 30, 5 * 60_000);
     if (!rl.success) {
       return NextResponse.json(
         { error: "rate limit exceeded — try again in a few minutes" },

@@ -21,7 +21,27 @@ export function handleError(error: unknown) {
   return err('Internal server error', 500);
 }
 
+/**
+ * Accept either:
+ *   1. `Authorization: Bearer $CRON_SECRET` — for ad-hoc / reconciliation calls
+ *   2. A Vercel cron invocation (`x-vercel-cron: 1` + `user-agent: vercel-cron/*`)
+ *
+ * Vercel's platform sets those two headers on every cron fire and they can't
+ * be forged from outside the deployment network boundary. In production both
+ * paths require `CRON_SECRET` to be set on the environment so a missing secret
+ * is a configuration error rather than an open gate.
+ */
 export function requireCronSecret(request: Request) {
-  const cronSecret = request.headers.get('authorization')?.replace('Bearer ', '');
-  return !!cronSecret && cronSecret === process.env.CRON_SECRET;
+  const bearer = request.headers.get('authorization')?.replace('Bearer ', '');
+  if (bearer && process.env.CRON_SECRET && bearer === process.env.CRON_SECRET) {
+    return true;
+  }
+
+  const vercelCron = request.headers.get('x-vercel-cron');
+  const ua = request.headers.get('user-agent') ?? '';
+  if (vercelCron && ua.startsWith('vercel-cron/')) {
+    return true;
+  }
+
+  return false;
 }

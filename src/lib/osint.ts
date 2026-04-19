@@ -14,7 +14,7 @@ export async function requirePro() {
     return err('Pro subscription required for OSINT tools', 403);
   }
   // Rate limit: 30 OSINT requests per minute per user
-  if (!rateLimit(`osint:${session.user.id}`, 30, 60_000).success) {
+  if (!(await rateLimit(`osint:${session.user.id}`, 30, 60_000)).success) {
     return err('Too many requests. Please try again later.', 429);
   }
   return null;

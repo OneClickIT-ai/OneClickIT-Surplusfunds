@@ -23,7 +23,7 @@ interface RouteContext {
 export async function GET(request: NextRequest, context: RouteContext) {
   try {
     const { token } = await context.params;
-    const rl = rateLimit(`portal:${token}`, 60, 60_000);
+    const rl = await rateLimit(`portal:${token}`, 60, 60_000);
     if (!rl.success) {
       return NextResponse.json({ error: "rate limit" }, { status: 429 });
     }

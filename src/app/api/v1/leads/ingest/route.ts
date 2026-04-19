@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     // 1b. Rate limit — 20 ingest requests per 5 minutes per user.
     // Ingest accepts up to 5000 rows per call; this is a generous envelope
     // that stops runaway loops without blocking real bulk loading.
-    const rl = rateLimit(`ingest:${session.user.id}`, 20, 5 * 60_000);
+    const rl = await rateLimit(`ingest:${session.user.id}`, 20, 5 * 60_000);
     if (!rl.success) {
       return NextResponse.json(
         { error: "rate limit exceeded — try again in a few minutes" },

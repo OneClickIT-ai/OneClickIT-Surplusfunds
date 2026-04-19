@@ -1,6 +1,9 @@
 import { prisma } from "@/lib/prisma";
-import type { ContactChannel, Prisma } from "@prisma/client";
+import type { ContactChannel, Prisma, Task } from "@prisma/client";
 
+import { seedFailedContactFollowUpTask } from "@/modules/tasks/server/autogen";
+
+import { classifyContactOutcome } from "../outcome";
 import type {
   CreateContactLogInput,
   UpdateContactLogInput,
@@ -15,7 +18,10 @@ export interface ActorContext {
 async function canActOnClaim(
   claimId: string,
   actor: ActorContext,
-): Promise<{ ok: true; claimantId: string | null } | { ok: false; reason: "notFound" | "forbidden" }> {
+): Promise<
+  | { ok: true; claimantId: string | null; assigneeId: string | null; userId: string | null }
+  | { ok: false; reason: "notFound" | "forbidden" }
+> {
   const claim = await prisma.claim.findUnique({
     where: { id: claimId },
     select: { userId: true, assigneeId: true, claimantId: true },
@@ -28,13 +34,21 @@ async function canActOnClaim(
   ) {
     return { ok: false, reason: "forbidden" };
   }
-  return { ok: true, claimantId: claim.claimantId };
+  return {
+    ok: true,
+    claimantId: claim.claimantId,
+    assigneeId: claim.assigneeId,
+    userId: claim.userId,
+  };
 }
 
 export type CreateContactLogResult =
   | { notFound: true }
   | { forbidden: true }
-  | { contactLog: Awaited<ReturnType<typeof prisma.contactLog.create>> };
+  | {
+      contactLog: Awaited<ReturnType<typeof prisma.contactLog.create>>;
+      followUpTask: Task | null;
+    };
 
 /**
  * Log a contact against a case. Used by the operator-driven quick-log form
@@ -64,7 +78,31 @@ export async function logContact(
       externalId: input.externalId ?? null,
     },
   });
-  return { contactLog };
+
+  // When an outbound attempt visibly failed, auto-spawn a follow-up task so
+  // the next step is tracked. Classification is conservative: only explicit
+  // failure keywords trigger task creation. Never break the log write on a
+  // task-side failure — the log itself is the source of truth.
+  let followUpTask: Task | null = null;
+  const outcome = classifyContactOutcome(contactLog.status, contactLog.direction);
+  if (outcome === "failed") {
+    try {
+      followUpTask = await seedFailedContactFollowUpTask(
+        contactLog.id,
+        claimId,
+        contactLog.channel,
+        gate.assigneeId ?? gate.userId,
+      );
+    } catch (e) {
+      console.error(
+        "[contact-log] seedFailedContactFollowUpTask failed",
+        contactLog.id,
+        e,
+      );
+    }
+  }
+
+  return { contactLog, followUpTask };
 }
 
 export async function listContactLogsForClaim(

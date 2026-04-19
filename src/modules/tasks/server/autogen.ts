@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
-import type { TaskType } from "@prisma/client";
+import type { ContactChannel, Task, TaskType } from "@prisma/client";
+
+import { followUpTitleFor } from "@/modules/outbound/outcome";
 
 /**
  * Internal helpers that seed tasks in response to workflow events.
@@ -77,4 +79,42 @@ export async function seedAgreementFollowUpTask(
     },
   });
   return true;
+}
+
+/**
+ * When an outbound contact attempt fails (no answer, bounced, etc.), queue a
+ * FOLLOW_UP task so nothing falls through the cracks. Idempotent on the
+ * contact-log id, and a no-op when the claim already has an open follow-up
+ * seeded from any contact attempt — operators shouldn't be buried in retries.
+ */
+export async function seedFailedContactFollowUpTask(
+  contactLogId: string,
+  claimId: string,
+  channel: ContactChannel,
+  assigneeId: string | null,
+): Promise<Task | null> {
+  const marker = `[followup:contact:${contactLogId}]`;
+  if (await taskExistsWithMarker(claimId, marker)) return null;
+
+  const openContactFollowUp = await prisma.task.findFirst({
+    where: {
+      claimId,
+      completedAt: null,
+      notes: { contains: "[followup:contact:" },
+    },
+    select: { id: true },
+  });
+  if (openContactFollowUp) return null;
+
+  return prisma.task.create({
+    data: {
+      claimId,
+      assigneeId,
+      type: "FOLLOW_UP" as TaskType,
+      title: followUpTitleFor(channel),
+      dueDate: daysFromNow(1),
+      priority: "high",
+      notes: `Auto-created after failed ${channel} attempt. Review contact log and retry.\n${marker}`,
+    },
+  });
 }

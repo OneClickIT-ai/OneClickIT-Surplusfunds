@@ -28,11 +28,13 @@ export function ContactActions({ caseId }: { caseId: string }) {
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [flash, setFlash] = useState<string | null>(null);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError(null);
+    setFlash(null);
     try {
       const body: Record<string, unknown> = { channel, direction };
       if (status.trim()) body.status = status.trim();
@@ -50,6 +52,11 @@ export function ContactActions({ caseId }: { caseId: string }) {
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.error ?? "log failed");
 
+      if (json.followUpTask?.title) {
+        setFlash(`Follow-up queued: ${json.followUpTask.title}`);
+      } else {
+        setFlash("Contact logged.");
+      }
       setStatus("");
       setDuration("");
       setNotes("");
@@ -147,6 +154,12 @@ export function ContactActions({ caseId }: { caseId: string }) {
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-2 text-xs text-red-700">
           {error}
+        </div>
+      )}
+
+      {flash && !error && (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-2 text-xs text-emerald-700">
+          {flash}
         </div>
       )}
 

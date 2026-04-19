@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 interface RouteContext {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 /** GET /api/v1/cases/:id/timeline — merged activity/task/agreement/contact stream. */
@@ -20,7 +20,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
 
-    const { id } = context.params;
+    const { id } = await context.params;
     if (!id) {
       return NextResponse.json({ error: "missing case id" }, { status: 400 });
     }

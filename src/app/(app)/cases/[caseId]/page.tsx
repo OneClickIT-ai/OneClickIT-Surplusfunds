@@ -16,16 +16,17 @@ export const dynamic = "force-dynamic";
 export default async function CaseDetailPage({
   params,
 }: {
-  params: { caseId: string };
+  params: Promise<{ caseId: string }>;
 }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) redirect("/auth/signin");
 
   const actor = { userId: session.user.id, role: session.user.role };
+  const { caseId } = await params;
 
   const [detail, timelineResult] = await Promise.all([
-    getCaseById(params.caseId, actor),
-    getCaseTimeline(params.caseId, actor),
+    getCaseById(caseId, actor),
+    getCaseTimeline(caseId, actor),
   ]);
 
   if (!detail) notFound();

@@ -9,7 +9,7 @@ import ScrapeButton from '@/components/county/ScrapeButton';
 import { FundEntry } from '@/types';
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 async function getCounty(id: string) {
@@ -30,13 +30,14 @@ async function getCounty(id: string) {
 
 export async function generateMetadata({ params }: PageProps) {
   try {
-    const county = await prisma.county.findUnique({ where: { id: params.id } });
+    const { id } = await params;
+    const county = await prisma.county.findUnique({ where: { id } });
     if (!county) return {};
     return {
       title: `${county.name} County, ${county.state} Surplus Funds`,
       description: `Find surplus funds and excess proceeds from ${county.name} County, ${county.state}. Access the official surplus funds list, claim rules${county.claimDeadline ? `, deadline: ${county.claimDeadline}` : ''}, and filing information.`,
       keywords: [`${county.name} County surplus funds`, `${county.state} surplus funds`, `${county.name} excess proceeds`, 'tax sale surplus', 'foreclosure surplus'],
-      alternates: { canonical: `/county/${params.id}` },
+      alternates: { canonical: `/county/${id}` },
       openGraph: {
         title: `${county.name} County, ${county.state} — Surplus Funds`,
         description: `Official surplus funds data for ${county.name} County, ${county.state}.`,
@@ -48,7 +49,8 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 export default async function CountyDetailPage({ params }: PageProps) {
-  const county = await getCounty(params.id);
+  const { id } = await params;
+  const county = await getCounty(id);
   if (!county) notFound();
 
   const latestFunds = county.fundsLists[0];

@@ -1,5 +1,9 @@
 import { prisma } from "@/lib/prisma";
-import type { TaskType } from "@prisma/client";
+import type { ContactChannel, TaskType } from "@prisma/client";
+import {
+  followUpDelayDays,
+  followUpTaskType,
+} from "@/modules/outbound/follow-up";
 
 /**
  * Internal helpers that seed tasks in response to workflow events.
@@ -57,6 +61,37 @@ export async function seedCaseKickoffTasks(
  * Seed a FOLLOW_UP task 5 days after an agreement is sent, so the operator
  * gets nudged if no signature comes back.
  */
+/**
+ * Seed a follow-up task when an outbound contact attempt fails (voicemail,
+ * no answer, bounce, etc.). Idempotent per contact-log id.
+ */
+export async function seedContactFollowUpTask(params: {
+  contactLogId: string;
+  claimId: string;
+  channel: ContactChannel;
+  assigneeId: string | null;
+}): Promise<boolean> {
+  const { contactLogId, claimId, channel, assigneeId } = params;
+  const marker = `[followup:contact:${contactLogId}]`;
+  if (await taskExistsWithMarker(claimId, marker)) return false;
+
+  const days = followUpDelayDays(channel);
+  const channelLabel = channel.toLowerCase().replace(/_/g, " ");
+  await prisma.task.create({
+    data: {
+      claimId,
+      assigneeId,
+      type: followUpTaskType(channel),
+      title: `Follow up on ${channelLabel} — no response`,
+      dueDate: daysFromNow(days),
+      priority: "high",
+      notes:
+        `Previous ${channelLabel} attempt didn't reach the claimant; retry or try another channel.\n${marker}`,
+    },
+  });
+  return true;
+}
+
 export async function seedAgreementFollowUpTask(
   agreementId: string,
   claimId: string,

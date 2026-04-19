@@ -40,21 +40,24 @@ export default function LeadsPage() {
   }, [loadLeads]);
 
   async function createCaseFromLead(lead: LeadItem) {
-    const res = await fetch("/api/v1/cases", {
+    const res = await fetch(`/api/v1/leads/${lead.id}/convert`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        leadId: lead.id,
-        countyName: lead.county.name,
-        state: lead.county.state,
-        ownerName: lead.ownerName,
-        propertyAddr: lead.propertyAddr,
-        parcelId: lead.parcelId,
-        amount: lead.surplusAmount,
-        surplusType: lead.surplusType,
-      }),
+      body: JSON.stringify({}),
     });
-    if (res.ok) await loadLeads();
+    if (res.ok) {
+      const json = await res.json();
+      window.location.href = `/cases/${json.data.id}`;
+      return;
+    }
+    if (res.status === 409) {
+      const json = await res.json();
+      if (json.existingClaimId) {
+        window.location.href = `/cases/${json.existingClaimId}`;
+        return;
+      }
+    }
+    await loadLeads();
   }
 
   if (loading) return <div className="p-6 text-sm text-zinc-500">Loading leads...</div>;

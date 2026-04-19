@@ -13,6 +13,7 @@ import {
   createIngestBatchRecord,
   type CountyRef,
 } from "@/modules/leads/server/repository";
+import { rescoreOne } from "@/modules/leads/server/scoring";
 
 export interface IngestContext {
   userId: string | null;
@@ -37,7 +38,7 @@ export async function ingestLeads(
   request: LeadIngestRequestParsed,
   ctx: IngestContext,
 ): Promise<IngestServiceResult> {
-  const { source, countyId, dryRun, items } = request;
+  const { source, countyId, dryRun, autoScore, items } = request;
 
   const results: LeadIngestItemResult[] = new Array(items.length);
   const summary: LeadIngestSummary = {
@@ -141,6 +142,16 @@ export async function ingestLeads(
       // Claimant persistence is best-effort; failures are logged inside.
       await upsertClaimantForLead(r.id, item);
 
+      // Optional scoring pass. Best-effort — a scoring failure should not
+      // fail the ingest row.
+      if (autoScore) {
+        try {
+          await rescoreOne(r.id);
+        } catch (e) {
+          console.error("[ingest] scoring failed for lead", r.id, e);
+        }
+      }
+
       results[index] = {
         index,
         status: r.wasCreated ? "created" : "updated",
@@ -158,9 +169,6 @@ export async function ingestLeads(
       summary.errors += 1;
     }
   }
-
-  // autoScore hook — intentional no-op until modules/leads/server/scoring.ts lands.
-  // TODO: invoke scoring.scoreLead(leadId) here when autoScore && !dryRun.
 
   // HTTP status choice:
   //  - 200: all eligible rows went through cleanly

@@ -109,6 +109,19 @@ export const casesQuerySchema = z.object({
   q: z.preprocess(emptyToUndefined, z.string().max(200).optional()),
 });
 
+/** POST /api/v1/leads/:id/convert body. All fields optional. */
+export const convertLeadSchema = z.object({
+  feePercent: z.preprocess(
+    moneyToNumberOrUndefined,
+    z.number().min(0).max(100).optional().nullable(),
+  ),
+  priority: z.enum(["low", "medium", "high"]).optional(),
+  assigneeId: z.string().cuid().optional().nullable(),
+  notes: z.string().max(2000).optional().nullable(),
+  requiresCourt: z.boolean().optional(),
+});
+
 export type CreateCaseInput = z.infer<typeof createCaseSchema>;
 export type UpdateCaseInput = z.infer<typeof updateCaseSchema>;
 export type CasesQueryInput = z.infer<typeof casesQuerySchema>;
+export type ConvertLeadInput = z.infer<typeof convertLeadSchema>;

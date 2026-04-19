@@ -13,6 +13,84 @@ export interface ActorContext {
   role: string;
 }
 
+/** Optional case-shape overrides at conversion time (fee, priority, assignee). */
+export interface ConvertLeadOverrides {
+  feePercent?: number | null;
+  priority?: "low" | "medium" | "high";
+  assigneeId?: string | null;
+  notes?: string | null;
+  requiresCourt?: boolean;
+}
+
+export type ConvertLeadResult =
+  | { notFound: true }
+  | { alreadyConverted: true; existingClaimId: string }
+  | { claim: Awaited<ReturnType<typeof prisma.claim.create>> };
+
+/**
+ * Convert a SurplusLead into a Claim (case). Atomic: if the case insert
+ * fails, the lead status stays NEW. Dedupes on Claim.leadId (unique).
+ */
+export async function convertLeadToCase(
+  leadId: string,
+  actor: ActorContext,
+  overrides: ConvertLeadOverrides = {},
+): Promise<ConvertLeadResult> {
+  const lead = await prisma.surplusLead.findUnique({
+    where: { id: leadId },
+    include: {
+      county: { select: { name: true, state: true } },
+      claimants: { select: { id: true }, take: 1 },
+      claim: { select: { id: true } },
+    },
+  });
+
+  if (!lead) return { notFound: true };
+  if (lead.claim) {
+    return { alreadyConverted: true, existingClaimId: lead.claim.id };
+  }
+
+  const claim = await prisma.$transaction(async (tx) => {
+    const created = await tx.claim.create({
+      data: {
+        userId: actor.userId,
+        assigneeId: overrides.assigneeId ?? null,
+        leadId: lead.id,
+        claimantId: lead.claimants[0]?.id ?? null,
+        countyName: lead.county.name,
+        state: lead.county.state,
+        ownerName: lead.ownerName,
+        propertyAddr: lead.propertyAddr,
+        parcelId: lead.parcelId,
+        amount: lead.surplusAmount,
+        deadlineDate: lead.deadlineDate,
+        feePercent: overrides.feePercent ?? null,
+        notes: overrides.notes ?? lead.notes ?? null,
+        priority: overrides.priority ?? "medium",
+        status: "research",
+        surplusType: lead.surplusType,
+        requiresCourt: overrides.requiresCourt ?? false,
+        activities: {
+          create: {
+            type: "note",
+            message: `Case converted from lead ${lead.id}`,
+          },
+        },
+      },
+      include: { activities: true, claimant: true, lead: true },
+    });
+
+    await tx.surplusLead.update({
+      where: { id: lead.id },
+      data: { status: "CONVERTED" },
+    });
+
+    return created;
+  });
+
+  return { claim };
+}
+
 /**
  * Access-scoped listing. Admins see all cases; everyone else sees cases they
  * own or are assigned to, plus unowned/unassigned cases (e.g. fresh intakes).

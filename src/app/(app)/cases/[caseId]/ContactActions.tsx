@@ -28,11 +28,13 @@ export function ContactActions({ caseId }: { caseId: string }) {
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError(null);
+    setInfo(null);
     try {
       const body: Record<string, unknown> = { channel, direction };
       if (status.trim()) body.status = status.trim();
@@ -49,6 +51,14 @@ export function ContactActions({ caseId }: { caseId: string }) {
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.error ?? "log failed");
+
+      if (json.followUpTaskId) {
+        setInfo("Logged. Follow-up task scheduled in 2 days.");
+      } else if (json.outcome === "succeeded") {
+        setInfo("Logged.");
+      } else {
+        setInfo("Logged.");
+      }
 
       setStatus("");
       setDuration("");
@@ -147,6 +157,11 @@ export function ContactActions({ caseId }: { caseId: string }) {
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-2 text-xs text-red-700">
           {error}
+        </div>
+      )}
+      {info && !error && (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-2 text-xs text-emerald-800">
+          {info}
         </div>
       )}
 

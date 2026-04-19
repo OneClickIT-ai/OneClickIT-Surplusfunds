@@ -5,6 +5,8 @@ import type {
   CreateContactLogInput,
   UpdateContactLogInput,
 } from "../schemas";
+import { classifyContactOutcome } from "../outcomes";
+import { seedContactFollowUpTask } from "@/modules/tasks/server/autogen";
 
 export interface ActorContext {
   userId: string;
@@ -15,7 +17,10 @@ export interface ActorContext {
 async function canActOnClaim(
   claimId: string,
   actor: ActorContext,
-): Promise<{ ok: true; claimantId: string | null } | { ok: false; reason: "notFound" | "forbidden" }> {
+): Promise<
+  | { ok: true; claimantId: string | null; assigneeId: string | null; userId: string | null }
+  | { ok: false; reason: "notFound" | "forbidden" }
+> {
   const claim = await prisma.claim.findUnique({
     where: { id: claimId },
     select: { userId: true, assigneeId: true, claimantId: true },
@@ -28,18 +33,32 @@ async function canActOnClaim(
   ) {
     return { ok: false, reason: "forbidden" };
   }
-  return { ok: true, claimantId: claim.claimantId };
+  return {
+    ok: true,
+    claimantId: claim.claimantId,
+    assigneeId: claim.assigneeId,
+    userId: claim.userId,
+  };
 }
 
 export type CreateContactLogResult =
   | { notFound: true }
   | { forbidden: true }
-  | { contactLog: Awaited<ReturnType<typeof prisma.contactLog.create>> };
+  | {
+      contactLog: Awaited<ReturnType<typeof prisma.contactLog.create>>;
+      followUpTaskId: string | null;
+      outcome: "succeeded" | "failed" | "neutral";
+    };
 
 /**
  * Log a contact against a case. Used by the operator-driven quick-log form
  * today; also the same entrypoint future Twilio/Resend send handlers should
  * call after a successful send, so every outbound touch is auditable.
+ *
+ * When the attempt is classified as a failure (e.g. no_answer, bounced),
+ * best-effort seeds a FOLLOW_UP task so no lead falls through the cracks.
+ * Task creation failures never fail the log write — the log is the system
+ * of record; automation is additive.
  */
 export async function logContact(
   claimId: string,
@@ -51,12 +70,13 @@ export async function logContact(
     return gate.reason === "notFound" ? { notFound: true } : { forbidden: true };
   }
 
+  const channel = input.channel as ContactChannel;
   const contactLog = await prisma.contactLog.create({
     data: {
       claimId,
       userId: actor.userId,
       claimantId: input.claimantId ?? gate.claimantId,
-      channel: input.channel as ContactChannel,
+      channel,
       direction: input.direction,
       status: input.status ?? null,
       notes: input.notes ?? null,
@@ -64,7 +84,29 @@ export async function logContact(
       externalId: input.externalId ?? null,
     },
   });
-  return { contactLog };
+
+  const { outcome, reason } = classifyContactOutcome(
+    channel,
+    input.direction,
+    input.status,
+  );
+
+  let followUpTaskId: string | null = null;
+  if (outcome === "failed") {
+    try {
+      followUpTaskId = await seedContactFollowUpTask({
+        contactLogId: contactLog.id,
+        claimId,
+        channel,
+        reason,
+        assigneeId: gate.assigneeId ?? gate.userId ?? actor.userId,
+      });
+    } catch (e) {
+      console.error("[contact-log] seedContactFollowUpTask failed", contactLog.id, e);
+    }
+  }
+
+  return { contactLog, followUpTaskId, outcome };
 }
 
 export async function listContactLogsForClaim(

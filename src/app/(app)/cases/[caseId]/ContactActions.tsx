@@ -28,11 +28,13 @@ export function ContactActions({ caseId }: { caseId: string }) {
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError(null);
+    setNotice(null);
     try {
       const body: Record<string, unknown> = { channel, direction };
       if (status.trim()) body.status = status.trim();
@@ -53,6 +55,11 @@ export function ContactActions({ caseId }: { caseId: string }) {
       setStatus("");
       setDuration("");
       setNotes("");
+      setNotice(
+        json?.followUpTaskId
+          ? "Logged. Follow-up task created."
+          : "Logged.",
+      );
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "log failed");
@@ -147,6 +154,11 @@ export function ContactActions({ caseId }: { caseId: string }) {
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-2 text-xs text-red-700">
           {error}
+        </div>
+      )}
+      {notice && !error && (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-2 text-xs text-emerald-700">
+          {notice}
         </div>
       )}
 

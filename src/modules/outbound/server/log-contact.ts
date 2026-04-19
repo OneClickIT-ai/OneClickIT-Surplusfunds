@@ -5,6 +5,8 @@ import type {
   CreateContactLogInput,
   UpdateContactLogInput,
 } from "../schemas";
+import { isFailedContactStatus } from "../failures";
+import { seedContactFailureFollowUpTask } from "@/modules/tasks/server/autogen";
 
 export interface ActorContext {
   userId: string;
@@ -15,7 +17,10 @@ export interface ActorContext {
 async function canActOnClaim(
   claimId: string,
   actor: ActorContext,
-): Promise<{ ok: true; claimantId: string | null } | { ok: false; reason: "notFound" | "forbidden" }> {
+): Promise<
+  | { ok: true; claimantId: string | null; assigneeId: string | null; ownerId: string | null }
+  | { ok: false; reason: "notFound" | "forbidden" }
+> {
   const claim = await prisma.claim.findUnique({
     where: { id: claimId },
     select: { userId: true, assigneeId: true, claimantId: true },
@@ -28,13 +33,21 @@ async function canActOnClaim(
   ) {
     return { ok: false, reason: "forbidden" };
   }
-  return { ok: true, claimantId: claim.claimantId };
+  return {
+    ok: true,
+    claimantId: claim.claimantId,
+    assigneeId: claim.assigneeId,
+    ownerId: claim.userId,
+  };
 }
 
 export type CreateContactLogResult =
   | { notFound: true }
   | { forbidden: true }
-  | { contactLog: Awaited<ReturnType<typeof prisma.contactLog.create>> };
+  | {
+      contactLog: Awaited<ReturnType<typeof prisma.contactLog.create>>;
+      followUpTaskId: string | null;
+    };
 
 /**
  * Log a contact against a case. Used by the operator-driven quick-log form
@@ -64,7 +77,31 @@ export async function logContact(
       externalId: input.externalId ?? null,
     },
   });
-  return { contactLog };
+
+  let followUpTaskId: string | null = null;
+  const shouldFollowUp = isFailedContactStatus({
+    channel: contactLog.channel,
+    direction: contactLog.direction === "inbound" ? "inbound" : "outbound",
+    status: contactLog.status,
+  });
+  if (shouldFollowUp) {
+    try {
+      followUpTaskId = await seedContactFailureFollowUpTask({
+        claimId,
+        contactLogId: contactLog.id,
+        channel: contactLog.channel,
+        direction: "outbound",
+        status: contactLog.status,
+        assigneeId: gate.assigneeId ?? gate.ownerId ?? actor.userId,
+      });
+    } catch (e) {
+      // Never fail the log write because of the nudge task; it'll be retried
+      // the next time a failure is logged or by future reconciliation jobs.
+      console.error("[contact-log] follow-up task create failed", contactLog.id, e);
+    }
+  }
+
+  return { contactLog, followUpTaskId };
 }
 
 export async function listContactLogsForClaim(

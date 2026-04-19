@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 interface RouteContext {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 /**
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
 
-    const { id } = context.params;
+    const { id } = await context.params;
     if (!id) {
       return NextResponse.json({ error: "missing lead id" }, { status: 400 });
     }

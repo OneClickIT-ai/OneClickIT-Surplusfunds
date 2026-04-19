@@ -10,12 +10,13 @@ export const dynamic = "force-dynamic";
 export default async function AgreementDetailPage({
   params,
 }: {
-  params: { agreementId: string };
+  params: Promise<{ agreementId: string }>;
 }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) redirect("/auth/signin");
 
-  const result = await getAgreement(params.agreementId, {
+  const { agreementId } = await params;
+  const result = await getAgreement(agreementId, {
     userId: session.user.id,
     role: session.user.role,
     name: session.user.name ?? "Agent",

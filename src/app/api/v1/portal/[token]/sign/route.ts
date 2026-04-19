@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 interface RouteContext {
-  params: { token: string };
+  params: Promise<{ token: string }>;
 }
 
 /**
@@ -23,7 +23,8 @@ interface RouteContext {
  */
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
-    const rl = rateLimit(`portal-sign:${context.params.token}`, 10, 60_000);
+    const { token } = await context.params;
+    const rl = rateLimit(`portal-sign:${token}`, 10, 60_000);
     if (!rl.success) {
       return NextResponse.json({ error: "rate limit" }, { status: 429 });
     }
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     }
 
     const result = await portalSignAgreement(
-      context.params.token,
+      token,
       parsed.data.agreementId,
       parsed.data.typedName,
     );

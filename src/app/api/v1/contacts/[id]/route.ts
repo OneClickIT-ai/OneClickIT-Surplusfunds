@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 interface RouteContext {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export async function PATCH(request: NextRequest, context: RouteContext) {
@@ -35,7 +35,8 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         { status: 400 },
       );
     }
-    const result = await updateContactLog(context.params.id, parsed.data, {
+    const { id } = await context.params;
+    const result = await updateContactLog(id, parsed.data, {
       userId: session.user.id,
       role: session.user.role,
     });
@@ -57,7 +58,8 @@ export async function DELETE(_: NextRequest, context: RouteContext) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
-    const result = await deleteContactLog(context.params.id, {
+    const { id } = await context.params;
+    const result = await deleteContactLog(id, {
       userId: session.user.id,
       role: session.user.role,
     });

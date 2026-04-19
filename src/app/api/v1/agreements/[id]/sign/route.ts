@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 interface RouteContext {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 /**
@@ -26,7 +26,8 @@ export async function POST(_: NextRequest, context: RouteContext) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
-    const result = await markSigned(context.params.id, {
+    const { id } = await context.params;
+    const result = await markSigned(id, {
       userId: session.user.id,
       role: session.user.role,
       name: session.user.name ?? "Agent",

@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 interface RouteContext {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export async function GET(_: NextRequest, context: RouteContext) {
@@ -22,7 +22,8 @@ export async function GET(_: NextRequest, context: RouteContext) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
-    const result = await listContactLogsForClaim(context.params.id, {
+    const { id } = await context.params;
+    const result = await listContactLogsForClaim(id, {
       userId: session.user.id,
       role: session.user.role,
     });
@@ -57,7 +58,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
         { status: 400 },
       );
     }
-    const result = await logContact(context.params.id, parsed.data, {
+    const { id } = await context.params;
+    const result = await logContact(id, parsed.data, {
       userId: session.user.id,
       role: session.user.role,
     });

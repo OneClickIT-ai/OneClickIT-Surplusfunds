@@ -62,6 +62,12 @@ describe("classifyContactOutcome", () => {
     );
   });
 
+  it("treats whitespace-only status as missing (reason is null, not empty string)", () => {
+    const r = classifyContactOutcome("CALL", "outbound", "   ");
+    expect(r.outcome).toBe("neutral");
+    expect(r.reason).toBeNull();
+  });
+
   it("returns neutral for unknown free-text statuses", () => {
     expect(classifyContactOutcome("CALL", "outbound", "left note").outcome).toBe(
       "neutral",

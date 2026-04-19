@@ -74,7 +74,7 @@ export function classifyContactOutcome(
   status: string | null | undefined,
 ): OutcomeClassification {
   if (direction !== "outbound") return { outcome: "neutral", reason: null };
-  if (!status) return { outcome: "neutral", reason: null };
+  if (!status || !status.trim()) return { outcome: "neutral", reason: null };
 
   const tag = normalize(status);
   if (FAILURE_TOKENS[channel].some((t) => tag.includes(t))) {

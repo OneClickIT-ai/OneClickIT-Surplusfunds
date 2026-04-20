@@ -1,4 +1,4 @@
-import { getServerSession } from 'next-auth';
+import { getServerSession } from '@/lib/auth';
 import { authOptions } from './auth';
 import { err } from './api-utils';
 import { rateLimit } from './rate-limit';

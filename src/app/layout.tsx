@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
+import { ClerkProvider } from '@clerk/nextjs';
 import './globals.css';
-import AuthProvider from '@/components/Auth/AuthProvider';
 import Header from '@/components/Layout/Header';
 import Footer from '@/components/Layout/Footer';
 import { Analytics } from '@vercel/analytics/react';
@@ -74,7 +74,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="min-h-screen bg-gray-50 font-sans">
-        <AuthProvider>
+        <ClerkProvider>
           <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-lg focus:bg-blue-600 focus:px-4 focus:py-2 focus:text-white focus:shadow-lg">
             Skip to main content
           </a>
@@ -84,7 +84,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Footer />
           </div>
           <Analytics />
-        </AuthProvider>
+        </ClerkProvider>
       </body>
     </html>
   );

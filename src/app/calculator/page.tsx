@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
 import { DollarSign, Calculator, Info } from 'lucide-react';
 import Card from '@/components/ui/Card';
@@ -33,7 +33,7 @@ export default function CalculatorPage() {
   const [result, setResult] = useState<Breakdown | null>(null);
 
   useEffect(() => {
-    if (status === 'unauthenticated') router.push('/auth/signin?callbackUrl=/calculator');
+    if (status === 'unauthenticated') router.push('/sign-in?redirect_url=/calculator');
   }, [status, router]);
 
   if (status === 'loading' || !session) {

@@ -1,4 +1,4 @@
-import { getServerSession } from "next-auth";
+import { getServerSession } from '@/lib/auth';
 import { redirect } from "next/navigation";
 
 import { authOptions } from "@/lib/auth";
@@ -15,7 +15,7 @@ type Tone = "red" | "amber" | "zinc";
 
 export default async function TasksPage() {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.id) redirect("/auth/signin");
+  if (!session?.user?.id) redirect("/sign-in");
 
   const actor = { userId: session.user.id, role: session.user.role };
 

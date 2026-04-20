@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
 import { FileText, Copy, Download, Check } from 'lucide-react';
 import Card from '@/components/ui/Card';
@@ -31,7 +31,7 @@ export default function TemplatesPage() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (status === 'unauthenticated') router.push('/auth/signin?callbackUrl=/templates');
+    if (status === 'unauthenticated') router.push('/sign-in?redirect_url=/templates');
   }, [status, router]);
 
   if (status === 'loading' || !session) {

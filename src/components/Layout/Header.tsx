@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession, useSignOut } from '@/lib/auth-client';
 import { Search, LayoutDashboard, Settings, LogOut, LogIn, Shield, Wrench, ClipboardList, BookOpen, Landmark, DollarSign, Menu, X } from 'lucide-react';
 
 const NAV_LINKS = [
@@ -17,6 +17,7 @@ const NAV_LINKS = [
 
 export default function Header() {
   const { data: session } = useSession();
+  const signOut = useSignOut();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -92,13 +93,13 @@ export default function Header() {
           ) : (
             <div className="ml-1 flex items-center gap-2 border-l border-gray-200 pl-3">
               <Link
-                href="/auth/signin"
+                href="/sign-in"
                 className="rounded-lg px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
               >
                 Sign in
               </Link>
               <Link
-                href="/auth/signup"
+                href="/sign-up"
                 className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700"
               >
                 <LogIn className="h-4 w-4" />
@@ -167,14 +168,14 @@ export default function Header() {
             ) : (
               <div className="flex gap-2">
                 <Link
-                  href="/auth/signin"
+                  href="/sign-in"
                   onClick={() => setMobileOpen(false)}
                   className="flex-1 rounded-lg border border-gray-200 px-3 py-2.5 text-center text-sm text-gray-600 hover:bg-gray-50"
                 >
                   Sign in
                 </Link>
                 <Link
-                  href="/auth/signup"
+                  href="/sign-up"
                   onClick={() => setMobileOpen(false)}
                   className="flex-1 rounded-lg bg-green-600 px-3 py-2.5 text-center text-sm font-medium text-white hover:bg-green-700"
                 >

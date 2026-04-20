@@ -1,4 +1,4 @@
-import { getServerSession } from "next-auth";
+import { getServerSession } from '@/lib/auth';
 import { redirect } from "next/navigation";
 
 import { authOptions } from "@/lib/auth";
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export default async function LeadsPage() {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.id) redirect("/auth/signin");
+  if (!session?.user?.id) redirect("/sign-in");
 
   const { data: items } = await listLeads({ page: 1, limit: 50 });
 

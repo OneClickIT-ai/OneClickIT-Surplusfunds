@@ -1,4 +1,4 @@
-import { getServerSession } from "next-auth";
+import { getServerSession } from '@/lib/auth';
 import { redirect } from "next/navigation";
 
 import { authOptions } from "@/lib/auth";
@@ -17,7 +17,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default async function AgreementsPage() {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.id) redirect("/auth/signin");
+  if (!session?.user?.id) redirect("/sign-in");
 
   const { data: items } = await listAgreements(
     { page: 1, limit: 100 },

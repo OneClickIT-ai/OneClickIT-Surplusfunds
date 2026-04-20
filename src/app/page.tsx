@@ -73,7 +73,7 @@ export default async function HomePage() {
       {/* Launch banner */}
       <div className="bg-green-600 px-4 py-2.5 text-center text-sm font-medium text-white">
         Now Live &mdash; Start finding surplus funds today.{' '}
-        <a href="/auth/signup" className="underline hover:text-green-100">Create your free account</a>
+        <Link href="/sign-up" className="underline hover:text-green-100">Create your free account</Link>
       </div>
 
       {/* Hero */}
@@ -246,7 +246,7 @@ export default async function HomePage() {
 
           <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
-              href="/auth/signup"
+              href="/sign-up"
               className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-6 py-3 text-sm font-medium text-white hover:bg-green-700"
             >
               <UserPlus className="h-4 w-4" />

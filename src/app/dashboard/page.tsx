@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-import { getServerSession } from 'next-auth';
+import { getServerSession } from '@/lib/auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
@@ -170,7 +170,7 @@ export default async function DashboardPage() {
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
         <p className="text-sm text-gray-500">
           Your hub for surplus funds research tools.{' '}
-          <Link href="/auth/signin" className="text-blue-600 hover:underline">Sign in</Link> for personalized alerts and saved searches.
+          <Link href="/sign-in" className="text-blue-600 hover:underline">Sign in</Link> for personalized alerts and saved searches.
         </p>
       </div>
 
@@ -268,7 +268,7 @@ export default async function DashboardPage() {
           Sign in to set up county alerts, save searches, and track your claims.
         </p>
         <Link
-          href="/auth/signin"
+          href="/sign-in"
           className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-blue-700 shadow-md hover:bg-blue-50 transition-colors"
         >
           Sign in Free <ArrowRight className="h-4 w-4" />

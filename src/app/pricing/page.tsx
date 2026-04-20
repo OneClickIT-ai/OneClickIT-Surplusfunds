@@ -1,5 +1,5 @@
 'use client';
-import { useSession, signIn } from 'next-auth/react';
+import { useSession, signIn } from '@/lib/auth-client';
 import { Check, Shield, Search, Download, Bell } from 'lucide-react';
 import Image from 'next/image';
 import Button from '@/components/ui/Button';

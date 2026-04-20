@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession } from '@/lib/auth-client';
 import Link from 'next/link';
 import { Plus, ArrowRight, AlertTriangle, FileSearch, LogIn } from 'lucide-react';
 import Button from '@/components/ui/Button';
@@ -195,7 +195,7 @@ export default function ClaimsPage() {
           <LogIn className="mx-auto mb-3 h-8 w-8 text-gray-300" />
           <p className="text-sm text-gray-500 mb-3">Sign in to track and manage your surplus funds claims.</p>
           <Link
-            href="/auth/signin"
+            href="/sign-in"
             className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
           >
             <LogIn className="h-4 w-4" />

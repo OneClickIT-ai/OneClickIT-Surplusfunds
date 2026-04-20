@@ -1,11 +1,17 @@
 import { z } from 'zod';
+import { isSafeFetchUrl } from './url-safety';
 
 export const countySchema = z.object({
   rank: z.number().int().positive(),
   name: z.string().min(1).max(100),
   state: z.string().length(2),
   population: z.number().int().nonnegative(),
-  listUrl: z.string().url().optional().nullable(),
+  listUrl: z
+    .string()
+    .url()
+    .refine(isSafeFetchUrl, { message: 'URL points to a blocked host (private/internal address)' })
+    .optional()
+    .nullable(),
   source: z.string().max(500).optional().nullable(),
   notes: z.string().max(1000).optional().nullable(),
   rulesText: z.string().optional().nullable(),

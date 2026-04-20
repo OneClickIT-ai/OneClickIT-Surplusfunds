@@ -1,4 +1,5 @@
 import { FundEntry } from '@/types';
+import { checkFetchUrl } from './url-safety';
 
 export interface ScraperResult {
   success: boolean;
@@ -12,6 +13,10 @@ export interface ScraperResult {
  * Uses puppeteer-core + @sparticuz/chromium for serverless compatibility.
  */
 export async function scrapeCounty(url: string): Promise<ScraperResult> {
+  const safety = checkFetchUrl(url);
+  if (!safety.ok) {
+    return { success: false, funds: [], error: `unsafe URL: ${safety.reason}` };
+  }
   const lower = url.toLowerCase();
 
   // CSV files — fetch and parse directly

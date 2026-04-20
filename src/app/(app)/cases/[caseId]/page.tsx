@@ -158,9 +158,19 @@ export default async function CaseDetailPage({
           </div>
 
           <div className="rounded-2xl border bg-white p-4 shadow-sm">
-            <h2 className="text-lg font-semibold">Log contact</h2>
+            <h2 className="text-lg font-semibold">Contact claimant</h2>
             <div className="mt-4">
-              <ContactActions caseId={detail.id} />
+              <ContactActions
+                caseId={detail.id}
+                claimant={
+                  detail.claimant
+                    ? {
+                        phone: detail.claimant.phone,
+                        email: detail.claimant.email,
+                      }
+                    : null
+                }
+              />
             </div>
           </div>
 

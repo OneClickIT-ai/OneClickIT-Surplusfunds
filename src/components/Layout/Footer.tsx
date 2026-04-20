@@ -72,6 +72,16 @@ export default function Footer() {
                   OneClickITLeads.com
                 </a>
               </li>
+              <li>
+                <a
+                  href="https://oneclickit.blog"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-gray-900"
+                >
+                  Blog
+                </a>
+              </li>
               <li><Link href="/terms" className="hover:text-gray-900">Terms of Service</Link></li>
               <li><Link href="/privacy" className="hover:text-gray-900">Privacy Policy</Link></li>
             </ul>

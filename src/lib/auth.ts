@@ -50,6 +50,36 @@ export const authConfig: NextAuthConfig = {
   session: {
     strategy: 'database',
   },
+  // `__Host-` prefix requires Secure + Path=/ + no Domain attribute — all of
+  // which Auth.js already sets in production. In dev we drop the prefix so
+  // cookies still work over http://localhost.
+  cookies:
+    process.env.NODE_ENV === 'production'
+      ? {
+          sessionToken: {
+            name: '__Host-authjs.session-token',
+            options: {
+              httpOnly: true,
+              sameSite: 'lax',
+              path: '/',
+              secure: true,
+            },
+          },
+          callbackUrl: {
+            name: '__Host-authjs.callback-url',
+            options: { sameSite: 'lax', path: '/', secure: true },
+          },
+          csrfToken: {
+            name: '__Host-authjs.csrf-token',
+            options: {
+              httpOnly: true,
+              sameSite: 'lax',
+              path: '/',
+              secure: true,
+            },
+          },
+        }
+      : undefined,
   debug: process.env.NODE_ENV === 'development',
 };
 

@@ -10,6 +10,7 @@ import { StatusUpdater } from "./StatusUpdater";
 import { PortalLinkAction } from "./PortalLinkAction";
 import { ContactActions } from "./ContactActions";
 import { ContactLogItem } from "./ContactLogItem";
+import { SendContact } from "./SendContact";
 
 export const dynamic = "force-dynamic";
 
@@ -158,7 +159,32 @@ export default async function CaseDetailPage({
           </div>
 
           <div className="rounded-2xl border bg-white p-4 shadow-sm">
+            <h2 className="text-lg font-semibold">Send SMS or email</h2>
+            <p className="mt-1 text-xs text-zinc-500">
+              Dispatches via provider and writes to the audit log automatically.
+              Failed sends create a follow-up task.
+            </p>
+            <div className="mt-4">
+              <SendContact
+                caseId={detail.id}
+                claimant={
+                  detail.claimant
+                    ? {
+                        phone: detail.claimant.phone ?? null,
+                        email: detail.claimant.email ?? null,
+                      }
+                    : null
+                }
+              />
+            </div>
+          </div>
+
+          <div className="rounded-2xl border bg-white p-4 shadow-sm">
             <h2 className="text-lg font-semibold">Log contact</h2>
+            <p className="mt-1 text-xs text-zinc-500">
+              Record calls, voicemails, mail, or in-person touches that happen
+              outside the app.
+            </p>
             <div className="mt-4">
               <ContactActions caseId={detail.id} />
             </div>

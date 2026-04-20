@@ -58,6 +58,36 @@ export async function seedCaseKickoffTasks(
 }
 
 /**
+ * Seed a FOLLOW_UP task when an outbound contact attempt fails so the
+ * operator has a concrete piece of work to fix the claimant record or
+ * retry another channel. Idempotent per failed ContactLog (marker keyed
+ * on the log id), so retries never stack up tasks.
+ */
+export async function seedFailedContactFollowUpTask(params: {
+  claimId: string;
+  assigneeId: string | null;
+  contactLogId: string;
+  channel: string;
+  reason: string;
+}): Promise<boolean> {
+  const marker = `[contact:failed:${params.contactLogId}]`;
+  if (await taskExistsWithMarker(params.claimId, marker)) return false;
+
+  await prisma.task.create({
+    data: {
+      claimId: params.claimId,
+      assigneeId: params.assigneeId,
+      type: "FOLLOW_UP" as TaskType,
+      title: `Retry ${params.channel.toLowerCase()} — send failed`,
+      dueDate: daysFromNow(1),
+      priority: "high",
+      notes: `Outbound ${params.channel} send failed (${params.reason}). Verify claimant details and retry.\n${marker}`,
+    },
+  });
+  return true;
+}
+
+/**
  * Seed a FOLLOW_UP task 5 days after an agreement is sent, so the operator
  * gets nudged if no signature comes back.
  */

@@ -1,6 +1,10 @@
 /**
  * Per-state surplus funds claim requirements.
  * Statutes, deadlines, required documents, filing offices, and fee caps.
+ *
+ * easyRating: 1 = easiest (no court, short docs, clear deadline, fast processing)
+ *             2 = moderate
+ *             3 = hardest (court petition required or complex)
  */
 
 export interface StateRequirements {
@@ -16,6 +20,9 @@ export interface StateRequirements {
   feeCapNotes: string;
   processTime: string;
   notes: string;
+  requiresCourt: boolean;
+  agentLicenseRequired: boolean;
+  easyRating: 1 | 2 | 3;
 }
 
 export const STATE_REQUIREMENTS: Record<string, StateRequirements> = {
@@ -42,6 +49,9 @@ export const STATE_REQUIREMENTS: Record<string, StateRequirements> = {
     feeCapNotes: 'No statutory fee cap for recovery agents in CA',
     processTime: '30–90 days after Board of Supervisors approval',
     notes: 'Board of Supervisors must approve. Some counties have a 90-day dispute period.',
+    requiresCourt: false,
+    agentLicenseRequired: false,
+    easyRating: 1,
   },
   TX: {
     state: 'TX',
@@ -65,6 +75,9 @@ export const STATE_REQUIREMENTS: Record<string, StateRequirements> = {
     feeCapNotes: 'No statutory fee cap, but court may review reasonableness of fees',
     processTime: '60–120 days after court hearing',
     notes: 'Texas requires a court petition — not just an administrative claim. Attorney often needed.',
+    requiresCourt: true,
+    agentLicenseRequired: true,
+    easyRating: 3,
   },
   FL: {
     state: 'FL',
@@ -88,6 +101,9 @@ export const STATE_REQUIREMENTS: Record<string, StateRequirements> = {
     feeCapNotes: 'FL does not cap recovery fees, but some counties require disclosure',
     processTime: '30–60 days',
     notes: 'Short 120-day window. Clerk distributes funds in order of priority of liens.',
+    requiresCourt: false,
+    agentLicenseRequired: false,
+    easyRating: 1,
   },
   GA: {
     state: 'GA',
@@ -110,6 +126,9 @@ export const STATE_REQUIREMENTS: Record<string, StateRequirements> = {
     feeCapNotes: 'No statutory fee cap',
     processTime: '30–90 days',
     notes: 'Excess funds held by Tax Commissioner. After 1 year, funds may escheat to the state.',
+    requiresCourt: false,
+    agentLicenseRequired: false,
+    easyRating: 1,
   },
   OH: {
     state: 'OH',
@@ -131,6 +150,9 @@ export const STATE_REQUIREMENTS: Record<string, StateRequirements> = {
     feeCapNotes: 'No statutory fee cap',
     processTime: '30–60 days',
     notes: 'Process varies by county. Contact the County Auditor for specific procedures.',
+    requiresCourt: false,
+    agentLicenseRequired: false,
+    easyRating: 2,
   },
   AZ: {
     state: 'AZ',
@@ -152,6 +174,9 @@ export const STATE_REQUIREMENTS: Record<string, StateRequirements> = {
     feeCapNotes: 'No statutory fee cap',
     processTime: '30–60 days',
     notes: 'Treasurer holds excess proceeds. Contact County Treasurer directly.',
+    requiresCourt: false,
+    agentLicenseRequired: false,
+    easyRating: 2,
   },
   MI: {
     state: 'MI',
@@ -173,6 +198,9 @@ export const STATE_REQUIREMENTS: Record<string, StateRequirements> = {
     feeCapNotes: 'Post-Rafaeli: counties must return surplus. No fee cap.',
     processTime: '60–120 days',
     notes: 'After the 2023 Rafaeli Supreme Court decision, MI counties must return surplus from tax foreclosures.',
+    requiresCourt: false,
+    agentLicenseRequired: false,
+    easyRating: 2,
   },
   MD: {
     state: 'MD',
@@ -194,6 +222,9 @@ export const STATE_REQUIREMENTS: Record<string, StateRequirements> = {
     feeCapNotes: 'No statutory fee cap',
     processTime: '30–90 days',
     notes: 'Process varies significantly by county in MD.',
+    requiresCourt: false,
+    agentLicenseRequired: false,
+    easyRating: 2,
   },
   NY: {
     state: 'NY',
@@ -215,6 +246,9 @@ export const STATE_REQUIREMENTS: Record<string, StateRequirements> = {
     feeCapNotes: 'No statutory fee cap',
     processTime: '60–120 days',
     notes: 'NYC and some counties have their own specific surplus funds procedures.',
+    requiresCourt: true,
+    agentLicenseRequired: false,
+    easyRating: 3,
   },
   CO: {
     state: 'CO',
@@ -236,8 +270,100 @@ export const STATE_REQUIREMENTS: Record<string, StateRequirements> = {
     feeCapNotes: 'No statutory fee cap',
     processTime: '30–60 days',
     notes: 'Surplus funds procedures vary by county.',
+    requiresCourt: false,
+    agentLicenseRequired: false,
+    easyRating: 2,
   },
 };
+
+const STATE_NAMES: Record<string, string> = {
+  AL: 'Alabama', AK: 'Alaska', AR: 'Arkansas', CT: 'Connecticut', DE: 'Delaware',
+  HI: 'Hawaii', ID: 'Idaho', IL: 'Illinois', IN: 'Indiana', IA: 'Iowa',
+  KS: 'Kansas', KY: 'Kentucky', LA: 'Louisiana', ME: 'Maine',
+  MA: 'Massachusetts', MN: 'Minnesota', MS: 'Mississippi', MO: 'Missouri',
+  MT: 'Montana', NE: 'Nebraska', NV: 'Nevada', NH: 'New Hampshire', NJ: 'New Jersey',
+  NM: 'New Mexico', NC: 'North Carolina', ND: 'North Dakota',
+  OK: 'Oklahoma', OR: 'Oregon', PA: 'Pennsylvania', RI: 'Rhode Island',
+  SC: 'South Carolina', SD: 'South Dakota', TN: 'Tennessee', UT: 'Utah',
+  VT: 'Vermont', VA: 'Virginia', WA: 'Washington', WV: 'West Virginia',
+  WI: 'Wisconsin', WY: 'Wyoming',
+};
+
+function stubState(
+  state: string,
+  overrides: Partial<StateRequirements> = {},
+): StateRequirements {
+  return {
+    state,
+    stateName: STATE_NAMES[state] || state,
+    statute: overrides.statute ?? 'See state tax / foreclosure code',
+    deadlineDays: overrides.deadlineDays ?? null,
+    deadlineDesc: overrides.deadlineDesc ?? 'Check county-specific deadlines',
+    filingOffice: overrides.filingOffice ?? 'County Treasurer or Clerk',
+    requiredDocs: overrides.requiredDocs ?? [
+      'Written claim form',
+      'Government-issued photo ID',
+      'Proof of ownership or lien interest',
+    ],
+    optionalDocs: overrides.optionalDocs ?? ['Estate/probate documents', 'Assignment of rights'],
+    feeCapPercent: overrides.feeCapPercent ?? null,
+    feeCapNotes: overrides.feeCapNotes ?? 'No statutory fee cap',
+    processTime: overrides.processTime ?? '30–90 days',
+    notes: overrides.notes ?? 'Surplus-funds procedures vary by county; contact the county directly.',
+    requiresCourt: overrides.requiresCourt ?? false,
+    agentLicenseRequired: overrides.agentLicenseRequired ?? false,
+    easyRating: overrides.easyRating ?? 2,
+  };
+}
+
+// Fill out the remaining 40 states with conservative defaults.
+Object.assign(STATE_REQUIREMENTS, {
+  AL: stubState('AL', { requiresCourt: true, easyRating: 3, notes: 'Alabama often requires judicial proceedings for surplus distribution.' }),
+  AK: stubState('AK'),
+  AR: stubState('AR'),
+  CT: stubState('CT'),
+  DE: stubState('DE'),
+  HI: stubState('HI'),
+  ID: stubState('ID', { easyRating: 1 }),
+  IL: stubState('IL', { easyRating: 2 }),
+  IN: stubState('IN', { easyRating: 2 }),
+  IA: stubState('IA'),
+  KS: stubState('KS'),
+  KY: stubState('KY'),
+  LA: stubState('LA'),
+  ME: stubState('ME'),
+  MA: stubState('MA', { requiresCourt: true, easyRating: 3, notes: 'MA foreclosure surplus typically routed through Land Court.' }),
+  MN: stubState('MN', { easyRating: 1 }),
+  MS: stubState('MS'),
+  MO: stubState('MO'),
+  MT: stubState('MT'),
+  NE: stubState('NE'),
+  NV: stubState('NV'),
+  NH: stubState('NH'),
+  NJ: stubState('NJ', { requiresCourt: true, easyRating: 3, notes: 'NJ surplus claims typically filed with the Superior Court.' }),
+  NM: stubState('NM'),
+  NC: stubState('NC', { easyRating: 2 }),
+  ND: stubState('ND'),
+  OK: stubState('OK'),
+  OR: stubState('OR'),
+  PA: stubState('PA', { easyRating: 2 }),
+  RI: stubState('RI', { requiresCourt: true, easyRating: 3 }),
+  SC: stubState('SC'),
+  SD: stubState('SD'),
+  TN: stubState('TN', { requiresCourt: true, easyRating: 3, notes: 'TN Chancery Court typically handles surplus distribution.' }),
+  UT: stubState('UT'),
+  VT: stubState('VT'),
+  VA: stubState('VA'),
+  WA: stubState('WA', { easyRating: 1 }),
+  WV: stubState('WV'),
+  WI: stubState('WI', { easyRating: 1 }),
+  WY: stubState('WY'),
+});
+
+/** Return states ranked easiest (rating 1) for lead prioritization. */
+export function getEasyStates(): StateRequirements[] {
+  return Object.values(STATE_REQUIREMENTS).filter((s) => s.easyRating === 1);
+}
 
 export function getStateRequirements(stateCode: string): StateRequirements | null {
   return STATE_REQUIREMENTS[stateCode] || null;

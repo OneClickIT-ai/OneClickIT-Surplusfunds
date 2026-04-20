@@ -29,5 +29,25 @@ export const updateContactLogSchema = z.object({
   duration: z.coerce.number().int().nonnegative().max(86_400).nullable().optional(),
 });
 
+/**
+ * Payload for the live-send endpoint. `to` is optional — when absent we fall
+ * back to the linked claimant's phone/email. Body max matches the widest
+ * practical provider limit so we don't eagerly truncate legitimate content.
+ */
+export const sendContactSchema = z.object({
+  channel: z.enum(["SMS", "EMAIL"]),
+  to: z
+    .preprocess(emptyToUndefined, z.string().min(3).max(254).optional())
+    .optional(),
+  body: z.string().trim().min(1).max(4000),
+  subject: z
+    .preprocess(emptyToUndefined, z.string().max(200).optional())
+    .optional(),
+  notes: z
+    .preprocess(emptyToUndefined, z.string().max(2000).optional())
+    .optional(),
+});
+
 export type CreateContactLogInput = z.infer<typeof createContactLogSchema>;
 export type UpdateContactLogInput = z.infer<typeof updateContactLogSchema>;
+export type SendContactSchemaInput = z.infer<typeof sendContactSchema>;

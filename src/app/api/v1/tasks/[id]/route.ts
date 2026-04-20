@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { auth } from '@/lib/auth';
-import { handleError } from "@/lib/api-utils";
+import { handleError, applyRateLimitHeaders, rateLimitExceeded } from "@/lib/api-utils";
+import { rateLimit } from "@/lib/rate-limit";
 import { updateTaskSchema } from "@/modules/tasks/schemas";
 import { deleteTask, updateTask } from "@/modules/tasks/server/service";
 
@@ -18,6 +19,9 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
+
+    const rl = await rateLimit(`v1:tasks:write:${session.user.id}`, 60, 60_000);
+    if (!rl.success) return rateLimitExceeded(rl);
 
     const { id } = await context.params;
     let body: unknown;
@@ -44,7 +48,10 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     if ("forbidden" in result) {
       return NextResponse.json({ error: "forbidden" }, { status: 403 });
     }
-    return NextResponse.json({ success: true, data: result.task });
+    return applyRateLimitHeaders(
+      NextResponse.json({ success: true, data: result.task }),
+      rl,
+    );
   } catch (e) {
     return handleError(e);
   }
@@ -56,6 +63,9 @@ export async function DELETE(_: NextRequest, context: RouteContext) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
+    const rl = await rateLimit(`v1:tasks:write:${session.user.id}`, 60, 60_000);
+    if (!rl.success) return rateLimitExceeded(rl);
+
     const { id } = await context.params;
     const result = await deleteTask(id, {
       userId: session.user.id,
@@ -67,7 +77,7 @@ export async function DELETE(_: NextRequest, context: RouteContext) {
     if ("forbidden" in result) {
       return NextResponse.json({ error: "forbidden" }, { status: 403 });
     }
-    return NextResponse.json({ success: true });
+    return applyRateLimitHeaders(NextResponse.json({ success: true }), rl);
   } catch (e) {
     return handleError(e);
   }

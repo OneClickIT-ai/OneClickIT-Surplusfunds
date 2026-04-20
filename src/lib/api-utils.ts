@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 import * as Sentry from '@sentry/nextjs';
+import type { RateLimitResult } from './rate-limit';
 
 export function ok<T>(data: T, status = 200) {
   return NextResponse.json({ data }, { status });
@@ -44,4 +45,33 @@ export function requireCronSecret(request: Request) {
   }
 
   return false;
+}
+
+/**
+ * Copy the RFC 6585-ish `X-RateLimit-*` headers onto a response. Use on both
+ * the 429 path and the success path so clients can always see their budget.
+ */
+export function applyRateLimitHeaders<T extends NextResponse>(
+  response: T,
+  result: RateLimitResult,
+): T {
+  response.headers.set('X-RateLimit-Limit', String(result.limit));
+  response.headers.set('X-RateLimit-Remaining', String(result.remaining));
+  response.headers.set('X-RateLimit-Reset', String(Math.ceil(result.reset / 1000)));
+  return response;
+}
+
+/**
+ * Build the canonical 429 response for a blocked request, including
+ * `Retry-After` in seconds so well-behaved clients back off.
+ */
+export function rateLimitExceeded(result: RateLimitResult): NextResponse {
+  const retryAfter = Math.max(1, Math.ceil((result.reset - Date.now()) / 1000));
+  const response = NextResponse.json(
+    { error: 'rate limit exceeded' },
+    { status: 429 },
+  );
+  applyRateLimitHeaders(response, result);
+  response.headers.set('Retry-After', String(retryAfter));
+  return response;
 }

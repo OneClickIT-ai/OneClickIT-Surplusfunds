@@ -20,10 +20,13 @@ describe("rateLimit (in-memory fallback)", () => {
     for (let i = 0; i < 3; i++) {
       const r = await rateLimit(key, 3, 1000);
       expect(r.success).toBe(true);
+      expect(r.limit).toBe(3);
+      expect(r.reset).toBeGreaterThan(Date.now());
     }
     const fourth = await rateLimit(key, 3, 1000);
     expect(fourth.success).toBe(false);
     expect(fourth.remaining).toBe(0);
+    expect(fourth.limit).toBe(3);
   });
 
   it("resets after the window expires", async () => {
@@ -88,5 +91,33 @@ describe("requireCronSecret", () => {
     const { requireCronSecret } = await import("@/lib/api-utils");
     const req = new Request("http://x.test");
     expect(requireCronSecret(req)).toBe(false);
+  });
+});
+
+describe("rate-limit response helpers", () => {
+  it("applyRateLimitHeaders writes X-RateLimit-* onto the response", async () => {
+    const { applyRateLimitHeaders } = await import("@/lib/api-utils");
+    const { NextResponse } = await import("next/server");
+    const reset = Date.now() + 30_000;
+    const out = applyRateLimitHeaders(NextResponse.json({ ok: true }), {
+      success: true,
+      limit: 30,
+      remaining: 29,
+      reset,
+    });
+    expect(out.headers.get("X-RateLimit-Limit")).toBe("30");
+    expect(out.headers.get("X-RateLimit-Remaining")).toBe("29");
+    expect(out.headers.get("X-RateLimit-Reset")).toBe(String(Math.ceil(reset / 1000)));
+  });
+
+  it("rateLimitExceeded returns 429 with Retry-After", async () => {
+    const { rateLimitExceeded } = await import("@/lib/api-utils");
+    const reset = Date.now() + 10_000;
+    const out = rateLimitExceeded({ success: false, limit: 30, remaining: 0, reset });
+    expect(out.status).toBe(429);
+    const retryAfter = Number(out.headers.get("Retry-After"));
+    expect(retryAfter).toBeGreaterThanOrEqual(1);
+    expect(retryAfter).toBeLessThanOrEqual(11);
+    expect(out.headers.get("X-RateLimit-Remaining")).toBe("0");
   });
 });

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { auth } from '@/lib/auth';
-import { handleError } from "@/lib/api-utils";
+import { handleError, applyRateLimitHeaders, rateLimitExceeded } from "@/lib/api-utils";
+import { rateLimit } from "@/lib/rate-limit";
 import { sendAgreement } from "@/modules/agreements/server/service";
 
 export const dynamic = "force-dynamic";
@@ -22,6 +23,9 @@ export async function POST(_: NextRequest, context: RouteContext) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
+    const rl = await rateLimit(`v1:agreements:send:${session.user.id}`, 10, 60_000);
+    if (!rl.success) return rateLimitExceeded(rl);
+
     const { id } = await context.params;
     const result = await sendAgreement(id, {
       userId: session.user.id,
@@ -37,7 +41,10 @@ export async function POST(_: NextRequest, context: RouteContext) {
     if ("badState" in result) {
       return NextResponse.json({ error: result.reason }, { status: 409 });
     }
-    return NextResponse.json({ success: true, data: result.agreement });
+    return applyRateLimitHeaders(
+      NextResponse.json({ success: true, data: result.agreement }),
+      rl,
+    );
   } catch (e) {
     return handleError(e);
   }

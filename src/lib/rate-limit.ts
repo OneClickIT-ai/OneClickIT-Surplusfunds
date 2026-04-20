@@ -15,7 +15,10 @@ import { Redis } from "@upstash/redis";
 
 export interface RateLimitResult {
   success: boolean;
+  limit: number;
   remaining: number;
+  /** ms epoch when the current window rolls over */
+  reset: number;
 }
 
 const rateMap = new Map<string, { count: number; resetTime: number }>();
@@ -48,12 +51,15 @@ function fallback(identifier: string, limit: number, windowMs: number): RateLimi
   const now = Date.now();
   const entry = rateMap.get(identifier);
   if (!entry || now > entry.resetTime) {
-    rateMap.set(identifier, { count: 1, resetTime: now + windowMs });
-    return { success: true, remaining: limit - 1 };
+    const resetTime = now + windowMs;
+    rateMap.set(identifier, { count: 1, resetTime });
+    return { success: true, limit, remaining: limit - 1, reset: resetTime };
   }
-  if (entry.count >= limit) return { success: false, remaining: 0 };
+  if (entry.count >= limit) {
+    return { success: false, limit, remaining: 0, reset: entry.resetTime };
+  }
   entry.count++;
-  return { success: true, remaining: limit - entry.count };
+  return { success: true, limit, remaining: limit - entry.count, reset: entry.resetTime };
 }
 
 export async function rateLimit(
@@ -64,8 +70,8 @@ export async function rateLimit(
   const limiter = getLimiter(limit, windowMs);
   if (!limiter) return fallback(identifier, limit, windowMs);
   try {
-    const { success, remaining } = await limiter.limit(identifier);
-    return { success, remaining };
+    const { success, limit: responseLimit, remaining, reset } = await limiter.limit(identifier);
+    return { success, limit: responseLimit, remaining, reset };
   } catch (e) {
     // If Upstash is configured but unreachable, don't block the request —
     // degrade to the in-memory window so traffic keeps flowing.

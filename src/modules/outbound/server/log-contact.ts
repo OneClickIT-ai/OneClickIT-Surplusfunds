@@ -14,7 +14,7 @@ export interface ActorContext {
 }
 
 /** Reusable access check: owner, assignee, or admin may log / edit / delete. */
-async function canActOnClaim(
+export async function canActOnClaim(
   claimId: string,
   actor: ActorContext,
 ): Promise<

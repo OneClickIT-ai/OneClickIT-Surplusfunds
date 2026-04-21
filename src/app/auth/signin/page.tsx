@@ -1,10 +1,32 @@
-'use client';
-import { signIn } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
-import Button from '@/components/ui/Button';
+import SignInForm from './SignInForm';
+import { authDiagnostics } from '@/lib/auth';
 
-export default function SignInPage() {
+type SearchParams = Promise<{ error?: string; callbackUrl?: string }>;
+
+const ERROR_MESSAGES: Record<string, string> = {
+  Configuration:
+    'Server auth is misconfigured. Check NEXTAUTH_SECRET, NEXTAUTH_URL, and provider credentials.',
+  AccessDenied: 'Access denied. Your account is not authorized for this app.',
+  Verification: 'Sign-in link is invalid or has expired. Request a new one.',
+  OAuthSignin: 'Could not start Google sign-in. Check GOOGLE_CLIENT_ID/SECRET.',
+  OAuthCallback: 'Google returned an error during callback. Check the redirect URI.',
+  OAuthCreateAccount: 'Could not create your account from Google. Check the database connection.',
+  EmailCreateAccount: 'Could not create your account via email.',
+  Callback: 'Sign-in callback failed. See server logs for details.',
+  OAuthAccountNotLinked:
+    'This email is already linked to another provider. Sign in with the original provider.',
+  EmailSignin: 'Could not send the sign-in email. Check EMAIL_SERVER/EMAIL_FROM.',
+  CredentialsSignin: 'Invalid dev credentials.',
+  SessionRequired: 'You must be signed in to view this page.',
+  Default: 'Something went wrong signing you in.',
+};
+
+export default async function SignInPage({ searchParams }: { searchParams: SearchParams }) {
+  const { error, callbackUrl } = await searchParams;
+  const errorMessage = error ? ERROR_MESSAGES[error] ?? ERROR_MESSAGES.Default : null;
+
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4">
       <div className="w-full max-w-sm">
@@ -16,15 +38,33 @@ export default function SignInPage() {
           <p className="text-sm text-gray-500">Sign in to your surplus funds dashboard</p>
         </div>
 
-        <div className="space-y-3">
-          <Button
-            className="w-full"
-            variant="primary"
-            onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
+        {errorMessage && (
+          <div
+            role="alert"
+            className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700"
           >
-            Sign in with Google
-          </Button>
-        </div>
+            <strong className="font-semibold">Sign-in failed:</strong> {errorMessage}
+            <div className="mt-1 font-mono text-xs text-red-500">code: {error}</div>
+          </div>
+        )}
+
+        {!authDiagnostics.hasGoogleOAuth &&
+          !authDiagnostics.hasEmailProvider &&
+          !authDiagnostics.isDevCredentialsEnabled && (
+            <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+              <strong className="font-semibold">No sign-in providers are configured.</strong> Set
+              <code className="mx-1">GOOGLE_CLIENT_ID</code>/<code>GOOGLE_CLIENT_SECRET</code>, or
+              set <code>EMAIL_SERVER</code>/<code>EMAIL_FROM</code>, or (local only) set{' '}
+              <code>AUTH_DEV_MODE=true</code> to enable dev credentials.
+            </div>
+          )}
+
+        <SignInForm
+          callbackUrl={callbackUrl ?? '/dashboard'}
+          hasGoogle={authDiagnostics.hasGoogleOAuth}
+          hasEmail={authDiagnostics.hasEmailProvider}
+          hasDevCredentials={authDiagnostics.isDevCredentialsEnabled}
+        />
 
         <p className="mt-6 text-center text-sm text-gray-500">
           Don&apos;t have an account?{' '}

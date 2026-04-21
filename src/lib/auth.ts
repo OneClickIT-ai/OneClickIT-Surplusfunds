@@ -6,12 +6,16 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from './prisma';
 import { ADMIN_EMAILS } from './constants';
 
-// Dev-mode fallback login. Enabled ONLY when AUTH_DEV_MODE=true AND not in
-// production. Lets operators sign in with an email (and optional shared
-// password) when Google OAuth credentials are not configured — so the app is
-// still testable locally and in staging.
+// Dev-mode fallback login. Enabled ONLY when all three conditions hold:
+//   1. AUTH_DEV_MODE=true
+//   2. NODE_ENV !== production
+//   3. AUTH_DEV_PASSWORD is set (non-empty)
+// Requiring the shared password prevents accidental "anyone can log in as
+// anyone" if AUTH_DEV_MODE is ever flipped on without a password in staging.
 const isDevCredentialsEnabled =
-  process.env.AUTH_DEV_MODE === 'true' && process.env.NODE_ENV !== 'production';
+  process.env.AUTH_DEV_MODE === 'true' &&
+  process.env.NODE_ENV !== 'production' &&
+  Boolean(process.env.AUTH_DEV_PASSWORD);
 
 const hasGoogleOAuth = Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
 const hasEmailProvider = Boolean(process.env.EMAIL_SERVER && process.env.EMAIL_FROM);
@@ -53,9 +57,9 @@ export const authOptions: NextAuthOptions = {
               const email = creds?.email?.trim().toLowerCase();
               if (!email) return null;
 
-              // If a shared dev password is set, enforce it.
-              const expected = process.env.AUTH_DEV_PASSWORD;
-              if (expected && creds?.password !== expected) return null;
+              // Always enforce the shared dev password; provider is only
+              // registered when AUTH_DEV_PASSWORD is set.
+              if (creds?.password !== process.env.AUTH_DEV_PASSWORD) return null;
 
               const role = ADMIN_EMAILS.includes(email) ? 'admin' : 'user';
               const user = await prisma.user.upsert({

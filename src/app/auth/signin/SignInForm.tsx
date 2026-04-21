@@ -1,5 +1,6 @@
 'use client';
 import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import Button from '@/components/ui/Button';
 
@@ -11,24 +12,49 @@ type Props = {
 };
 
 export default function SignInForm({ callbackUrl, hasGoogle, hasEmail, hasDevCredentials }: Props) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [emailSent, setEmailSent] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const router = useRouter();
+
+  const [magicEmail, setMagicEmail] = useState('');
+  const [magicSubmitting, setMagicSubmitting] = useState(false);
+  const [magicSent, setMagicSent] = useState(false);
+  const [magicError, setMagicError] = useState<string | null>(null);
+
+  const [devEmail, setDevEmail] = useState('');
+  const [devPassword, setDevPassword] = useState('');
+  const [devSubmitting, setDevSubmitting] = useState(false);
+  const [devError, setDevError] = useState<string | null>(null);
 
   async function onEmailLink(e: FormEvent) {
     e.preventDefault();
-    setSubmitting(true);
-    const res = await signIn('email', { email, callbackUrl, redirect: false });
-    setSubmitting(false);
-    if (res?.ok) setEmailSent(true);
+    setMagicError(null);
+    setMagicSent(false);
+    setMagicSubmitting(true);
+    const res = await signIn('email', { email: magicEmail, callbackUrl, redirect: false });
+    setMagicSubmitting(false);
+    if (res?.ok) {
+      setMagicSent(true);
+    } else {
+      setMagicError(res?.error ?? 'Could not send sign-in link. Please try again.');
+    }
   }
 
   async function onDevLogin(e: FormEvent) {
     e.preventDefault();
-    setSubmitting(true);
-    await signIn('dev-credentials', { email, password, callbackUrl });
-    setSubmitting(false);
+    setDevError(null);
+    setDevSubmitting(true);
+    const res = await signIn('dev-credentials', {
+      email: devEmail,
+      password: devPassword,
+      callbackUrl,
+      redirect: false,
+    });
+    setDevSubmitting(false);
+    if (res?.ok) {
+      router.push(res.url ?? callbackUrl);
+      router.refresh();
+    } else {
+      setDevError('Invalid email or dev password.');
+    }
   }
 
   return (
@@ -45,48 +71,64 @@ export default function SignInForm({ callbackUrl, hasGoogle, hasEmail, hasDevCre
 
       {hasEmail && (
         <form onSubmit={onEmailLink} className="space-y-2">
-          <label className="block text-xs font-medium text-gray-600">Email magic link</label>
+          <label className="block text-xs font-medium text-gray-600" htmlFor="magic-email">
+            Email magic link
+          </label>
           <input
+            id="magic-email"
             type="email"
             required
-            value={email}
-            onChange={e => setEmail(e.target.value)}
+            value={magicEmail}
+            onChange={e => setMagicEmail(e.target.value)}
             placeholder="you@example.com"
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
           />
-          <Button type="submit" variant="outline" className="w-full" loading={submitting}>
+          <Button type="submit" variant="outline" className="w-full" loading={magicSubmitting}>
             Email me a sign-in link
           </Button>
-          {emailSent && (
+          {magicSent && (
             <p className="text-xs text-green-600">Check your inbox for a sign-in link.</p>
           )}
+          {magicError && <p className="text-xs text-red-600">{magicError}</p>}
         </form>
       )}
 
       {hasDevCredentials && (
-        <form onSubmit={onDevLogin} className="space-y-2 rounded-md border border-dashed border-amber-300 bg-amber-50/50 p-3">
+        <form
+          onSubmit={onDevLogin}
+          className="space-y-2 rounded-md border border-dashed border-amber-300 bg-amber-50/50 p-3"
+        >
           <div className="flex items-center justify-between">
-            <label className="block text-xs font-medium text-amber-800">Dev login (non-prod)</label>
+            <label
+              htmlFor="dev-email"
+              className="block text-xs font-medium text-amber-800"
+            >
+              Dev login (non-prod)
+            </label>
             <span className="text-[10px] uppercase tracking-wide text-amber-700">AUTH_DEV_MODE</span>
           </div>
           <input
+            id="dev-email"
             type="email"
             required
-            value={email}
-            onChange={e => setEmail(e.target.value)}
+            value={devEmail}
+            onChange={e => setDevEmail(e.target.value)}
             placeholder="dev@example.com"
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
           />
           <input
+            id="dev-password"
             type="password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            placeholder="AUTH_DEV_PASSWORD (if set)"
+            required
+            value={devPassword}
+            onChange={e => setDevPassword(e.target.value)}
+            placeholder="AUTH_DEV_PASSWORD"
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
           />
-          <Button type="submit" variant="secondary" className="w-full" loading={submitting}>
+          <Button type="submit" variant="secondary" className="w-full" loading={devSubmitting}>
             Dev sign in
           </Button>
+          {devError && <p className="text-xs text-red-600">{devError}</p>}
         </form>
       )}
     </div>

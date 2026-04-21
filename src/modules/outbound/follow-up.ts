@@ -20,6 +20,7 @@ const FAILED_STATUSES = new Set([
   "failed",
   "undeliverable",
   "invalid_number",
+  "invalid_address",
   "wrong_number",
   "no_response",
   "returned",

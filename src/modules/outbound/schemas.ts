@@ -29,5 +29,24 @@ export const updateContactLogSchema = z.object({
   duration: z.coerce.number().int().nonnegative().max(86_400).nullable().optional(),
 });
 
+// Send-and-log: operators click "Send SMS" / "Send Email" and we actually
+// dispatch through Twilio/Resend. `subject` only applies to EMAIL.
+export const sendContactSchema = z
+  .object({
+    channel: z.enum(["SMS", "EMAIL"]),
+    body: z
+      .preprocess(emptyToUndefined, z.string().min(1).max(1600))
+      .transform((v) => String(v)),
+    subject: z
+      .preprocess(emptyToUndefined, z.string().max(200).optional())
+      .optional(),
+    claimantId: z.string().cuid().optional().nullable(),
+  })
+  .refine(
+    (v) => v.channel !== "EMAIL" || (typeof v.subject === "string" && v.subject.trim().length > 0),
+    { message: "subject is required for EMAIL", path: ["subject"] },
+  );
+
 export type CreateContactLogInput = z.infer<typeof createContactLogSchema>;
 export type UpdateContactLogInput = z.infer<typeof updateContactLogSchema>;
+export type SendContactInput = z.infer<typeof sendContactSchema>;

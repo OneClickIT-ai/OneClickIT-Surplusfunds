@@ -31,3 +31,27 @@ export const updateContactLogSchema = z.object({
 
 export type CreateContactLogInput = z.infer<typeof createContactLogSchema>;
 export type UpdateContactLogInput = z.infer<typeof updateContactLogSchema>;
+
+// Channels that support a real outbound send through a provider today.
+// (Calls still go through manual quick-log; telephony would be a future add.)
+const SENDABLE_CHANNEL = z.enum(["SMS", "EMAIL"]);
+
+export const sendContactSchema = z.object({
+  channel: SENDABLE_CHANNEL,
+  to: z
+    .preprocess(emptyToUndefined, z.string().max(200).optional())
+    .optional()
+    .nullable(),
+  subject: z
+    .preprocess(emptyToUndefined, z.string().max(200).optional())
+    .optional()
+    .nullable(),
+  body: z
+    .string()
+    .trim()
+    .min(1, "body is required")
+    .max(2000, "body is too long"),
+  claimantId: z.string().cuid().optional().nullable(),
+});
+
+export type SendContactInput = z.infer<typeof sendContactSchema>;

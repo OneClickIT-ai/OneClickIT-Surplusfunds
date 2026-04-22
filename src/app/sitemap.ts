@@ -27,24 +27,39 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority,
   }));
 
-  const counties = await prisma.county.findMany({ select: { id: true, updatedAt: true } });
-  const countyPages = counties.map(c => ({
-    url: `${BASE}/county/${c.id}`,
-    lastModified: c.updatedAt,
-    changeFrequency: 'weekly' as const,
-    priority: 0.6,
-  }));
-
-  const states = await prisma.unclaimedProperty.findMany({
-    select: { state: true },
-    distinct: ['state'],
-  });
-  const statePages = states.map(s => ({
-    url: `${BASE}/unclaimed/${s.state.toLowerCase()}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly' as const,
-    priority: 0.7,
-  }));
+  // DB-backed entries are best-effort: if the build runs without a DB
+  // (CI without POSTGRES_URL, preview envs, etc.) we still want a valid
+  // sitemap with the static routes rather than a failed prerender.
+  const [countyPages, statePages] = await Promise.all([
+    prisma.county
+      .findMany({ select: { id: true, updatedAt: true } })
+      .then((rows) =>
+        rows.map((c) => ({
+          url: `${BASE}/county/${c.id}`,
+          lastModified: c.updatedAt,
+          changeFrequency: 'weekly' as const,
+          priority: 0.6,
+        })),
+      )
+      .catch((e) => {
+        console.warn('[sitemap] skipping county pages:', e instanceof Error ? e.message : e);
+        return [];
+      }),
+    prisma.unclaimedProperty
+      .findMany({ select: { state: true }, distinct: ['state'] })
+      .then((rows) =>
+        rows.map((s) => ({
+          url: `${BASE}/unclaimed/${s.state.toLowerCase()}`,
+          lastModified: new Date(),
+          changeFrequency: 'weekly' as const,
+          priority: 0.7,
+        })),
+      )
+      .catch((e) => {
+        console.warn('[sitemap] skipping state pages:', e instanceof Error ? e.message : e);
+        return [];
+      }),
+  ]);
 
   return [...staticPages, ...countyPages, ...statePages];
 }

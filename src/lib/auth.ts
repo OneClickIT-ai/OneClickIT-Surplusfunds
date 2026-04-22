@@ -33,6 +33,14 @@ export const authOptions: NextAuthOptions = {
           GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID!,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+            // If a User row already exists with this email (e.g. created by a
+            // prior magic-link sign-in or a seed script) NextAuth will by
+            // default reject Google sign-in with OAuthAccountNotLinked. We
+            // trust Google's verified email and link automatically — this is
+            // safe because both sides have verified the same address. Without
+            // this flag, an existing user can be permanently locked out of
+            // Google sign-in the first time they try it.
+            allowDangerousEmailAccountLinking: true,
           }),
         ]
       : []),

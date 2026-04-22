@@ -3,6 +3,10 @@ import { prisma } from '@/lib/prisma';
 
 const BASE = 'https://surplusclickit.com';
 
+// Prisma-backed — can't be prerendered at build time without POSTGRES_URL.
+// Keep it on-request so CI (and any DB-less environment) can still build.
+export const dynamic = 'force-dynamic';
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Only include public, indexable pages — exclude auth-gated routes
   const staticPages = [

@@ -1,14 +1,18 @@
 import { NextResponse } from 'next/server';
-import { authDiagnostics } from '@/lib/auth';
+import { getServerSession } from 'next-auth';
+import { authDiagnostics, authOptions } from '@/lib/auth';
 
 // GET /api/auth/diagnostics
-// Returns a boolean-only snapshot of auth config (no secret values) so an
-// operator can see at a glance what's wired. Safe in production because it
-// never exposes values — only "is this env var present?".
+// Boolean-only snapshot of auth config (never exposes values, only presence)
+// so an operator can see at a glance what's wired. Admin-gated so an
+// unauthenticated attacker can't probe which env vars are missing.
 export async function GET() {
+  const session = await getServerSession(authOptions);
+  if (session?.user?.role !== 'admin') {
+    return NextResponse.json({ error: 'forbidden' }, { status: 403 });
+  }
   return NextResponse.json({
     ...authDiagnostics,
     env: process.env.NODE_ENV,
-    nextauthUrl: process.env.NEXTAUTH_URL ?? null,
   });
 }

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Monitor, Shield, Cpu, Phone, Wifi, HardDrive, Mail, Clock, CheckCircle2, ExternalLink, ArrowRight } from 'lucide-react';
+import { Monitor, Shield, Cpu, Phone, Wifi, HardDrive, Mail, Clock, CheckCircle2, ExternalLink, ArrowRight, Gem, Heart } from 'lucide-react';
 
 export default function PartnersPage() {
   return (
@@ -104,6 +104,94 @@ export default function PartnersPage() {
         </div>
       </div>
 
+      {/* SleekGemsHall Feature Card */}
+      <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-8 shadow-sm mb-10">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Left — Info */}
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="rounded-xl bg-emerald-600 p-3">
+                <Gem className="h-7 w-7 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">SleekGemsHall</h2>
+                <p className="text-sm text-emerald-600 font-medium">Official Gems & Jewelry Partner</p>
+              </div>
+            </div>
+
+            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1.5 mb-4">
+              <Heart className="h-4 w-4 text-emerald-600" />
+              <span className="text-sm font-semibold text-emerald-700">10% of all proceeds donated to charity</span>
+            </div>
+
+            <p className="text-gray-700 mb-4 text-lg font-medium">
+              Elegance you can feel good about.
+            </p>
+
+            <p className="text-gray-600 mb-6">
+              SleekGemsHall is a curated gem and jewelry shop offering beautifully crafted pieces at accessible prices.
+              What sets them apart: <strong>10% of every purchase goes directly to charitable causes</strong>,
+              making each piece of jewelry a meaningful contribution to those in need.
+            </p>
+
+            <p className="text-gray-600 mb-6">
+              Whether you&apos;re treating yourself or looking for a thoughtful gift, shopping at SleekGemsHall means
+              supporting a business that gives back. Discover their collection of sleek, handpicked gems and jewelry
+              that combine style with purpose.
+            </p>
+
+            <a
+              href="https://sleekgemshall.shop/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors"
+            >
+              Visit SleekGemsHall
+              <ExternalLink className="h-4 w-4" />
+            </a>
+          </div>
+
+          {/* Right — Features */}
+          <div className="lg:w-80 flex-shrink-0">
+            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+              Why Shop with SleekGemsHall
+            </h3>
+            <div className="space-y-3">
+              {[
+                { icon: Gem, label: 'Curated Gem Collection', desc: 'Hand-selected gems and fine jewelry' },
+                { icon: Heart, label: '10% Goes to Charity', desc: 'Every purchase supports charitable causes' },
+                { icon: Shield, label: 'Quality Guaranteed', desc: 'Premium pieces at accessible prices' },
+                { icon: CheckCircle2, label: 'Ethically Sourced', desc: 'Responsibly sourced materials' },
+                { icon: ExternalLink, label: 'Easy Online Shopping', desc: 'Browse and buy from anywhere' },
+                { icon: ArrowRight, label: 'Meaningful Gifts', desc: 'Give beauty that gives back' },
+              ].map(item => (
+                <div key={item.label} className="flex items-start gap-3">
+                  <div className="rounded-lg bg-emerald-100 p-1.5 mt-0.5">
+                    <item.icon className="h-4 w-4 text-emerald-600" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">{item.label}</div>
+                    <div className="text-xs text-gray-500">{item.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Charity highlight */}
+        <div className="mt-8 pt-6 border-t border-emerald-100">
+          <div className="rounded-xl bg-emerald-600 p-5 text-white text-center">
+            <Heart className="h-6 w-6 mx-auto mb-2 text-emerald-200" />
+            <p className="font-semibold text-lg mb-1">Shop with Purpose</p>
+            <p className="text-emerald-100 text-sm max-w-xl mx-auto">
+              SleekGemsHall donates <strong className="text-white">10% of all proceeds</strong> to charitable organizations.
+              Every purchase you make helps fund meaningful causes while you enjoy beautiful, quality jewelry.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Why Tech Support Matters */}
       <div className="rounded-xl bg-gray-50 border border-gray-200 p-6 mb-10">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">
@@ -136,22 +224,38 @@ export default function PartnersPage() {
         </div>
       </div>
 
-      {/* CTA */}
-      <div className="rounded-xl bg-blue-600 p-8 text-center text-white">
-        <h2 className="text-xl font-bold mb-2">Having Technical Issues?</h2>
-        <p className="text-blue-100 mb-6 max-w-xl mx-auto">
-          Don&apos;t let tech problems slow down your surplus funds business.
-          Get instant AI-powered support from our technology partner.
-        </p>
-        <a
-          href="https://oneclickit.ai"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-blue-700 hover:bg-blue-50 transition-colors"
-        >
-          Get Help from OneClickIT.ai
-          <ArrowRight className="h-4 w-4" />
-        </a>
+      {/* CTA — both partners */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="rounded-xl bg-blue-600 p-6 text-center text-white">
+          <h2 className="text-lg font-bold mb-2">Having Technical Issues?</h2>
+          <p className="text-blue-100 mb-4 text-sm">
+            Don&apos;t let tech problems slow down your surplus funds business.
+          </p>
+          <a
+            href="https://oneclickit.ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-blue-700 hover:bg-blue-50 transition-colors"
+          >
+            Get Help from OneClickIT.ai
+            <ArrowRight className="h-4 w-4" />
+          </a>
+        </div>
+        <div className="rounded-xl bg-emerald-600 p-6 text-center text-white">
+          <h2 className="text-lg font-bold mb-2">Shop & Give Back</h2>
+          <p className="text-emerald-100 mb-4 text-sm">
+            10% of every SleekGemsHall purchase goes to charity. Beautiful jewelry with purpose.
+          </p>
+          <a
+            href="https://sleekgemshall.shop/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 transition-colors"
+          >
+            Shop SleekGemsHall
+            <ArrowRight className="h-4 w-4" />
+          </a>
+        </div>
       </div>
 
       {/* Back to tools */}

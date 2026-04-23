@@ -117,21 +117,33 @@ export default function ToolsPage() {
         })}
       </div>
 
-      {/* Partner banner */}
-      <div className="mt-10 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 p-6 text-white">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>
-            <h2 className="text-lg font-semibold">Need Tech Support?</h2>
-            <p className="text-sm text-blue-100 mt-1">
-              Our partner <strong>OneClickIT.ai</strong> provides AI-powered IT support for surplus funds professionals.
-            </p>
-          </div>
+      {/* Partner banners */}
+      <div className="mt-10 grid gap-4 sm:grid-cols-2">
+        <div className="rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 p-6 text-white">
+          <h2 className="text-lg font-semibold">Need Tech Support?</h2>
+          <p className="text-sm text-blue-100 mt-1 mb-4">
+            Our partner <strong>OneClickIT.ai</strong> provides AI-powered IT support for surplus funds professionals.
+          </p>
           <Link
             href="/partners"
-            className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-50 transition-colors whitespace-nowrap"
+            className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-50 transition-colors"
           >
             View Partners
           </Link>
+        </div>
+        <div className="rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 p-6 text-white">
+          <h2 className="text-lg font-semibold">Shop &amp; Give Back</h2>
+          <p className="text-sm text-emerald-100 mt-1 mb-4">
+            Our partner <strong>SleekGemsHall</strong> offers curated gems &amp; jewelry — and donates <strong>10% of all proceeds to charity.</strong>
+          </p>
+          <a
+            href="https://sleekgemshall.shop/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50 transition-colors"
+          >
+            Visit SleekGemsHall
+          </a>
         </div>
       </div>
 

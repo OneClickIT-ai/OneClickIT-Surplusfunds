@@ -4,7 +4,7 @@ import { Check } from 'lucide-react';
 import Image from 'next/image';
 import Button from '@/components/ui/Button';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
 
 const BENEFITS = [
   'Browse 200+ county surplus funds lists across 10 states',
@@ -20,7 +20,7 @@ export default function SignUpPage() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!email) return;
     setLoading(true);

@@ -29,9 +29,9 @@ export default function PrivacyPage() {
 
           <h3 className="text-base font-medium text-gray-800 mt-3 mb-1">Account Information</h3>
           <p>
-            When you create an account via Google OAuth, we receive your name, email address, and
-            profile picture from Google. We store this information to manage your account and
-            personalize your experience.
+            When you create an account we collect your email address, which you provide when
+            requesting a magic link sign-in. We store this to manage your account and personalize
+            your experience.
           </p>
 
           <h3 className="text-base font-medium text-gray-800 mt-3 mb-1">Usage Data</h3>
@@ -76,7 +76,7 @@ export default function PrivacyPage() {
           <p>We do not sell your personal information. We may share data with:</p>
           <ul className="list-disc pl-5 space-y-1 mt-2">
             <li><strong>Stripe</strong> &mdash; for payment processing.</li>
-            <li><strong>Google</strong> &mdash; for authentication (OAuth).</li>
+            <li><strong>Resend</strong> &mdash; for sending magic link authentication emails.</li>
             <li><strong>Vercel</strong> &mdash; our hosting provider, which processes server requests.</li>
             <li><strong>Law enforcement</strong> &mdash; if required by law or valid legal process.</li>
           </ul>
@@ -95,9 +95,9 @@ export default function PrivacyPage() {
           <h2 className="text-lg font-semibold text-gray-900 mb-2">6. Data Security</h2>
           <p>
             We use industry-standard security measures including HTTPS encryption, secure database
-            hosting (Vercel Postgres), and OAuth-based authentication. However, no method of
-            transmission over the internet is 100% secure. We cannot guarantee absolute security of
-            your data.
+            hosting (Vercel Postgres), and passwordless email-based authentication. However, no
+            method of transmission over the internet is 100% secure. We cannot guarantee absolute
+            security of your data.
           </p>
         </section>
 

@@ -154,7 +154,7 @@ export default async function HomePage() {
                   icon: <UserPlus className="h-5 w-5" />,
                   color: 'blue',
                   title: 'Create Your Free Account',
-                  desc: 'Sign up in seconds with Google. No credit card required. Get instant access to our county directory.',
+                  desc: 'Sign up in seconds with your email. No password or credit card required. Get instant access to our county directory.',
                   tag: 'Get started',
                 },
                 {

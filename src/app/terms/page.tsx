@@ -48,9 +48,9 @@ export default function TermsPage() {
         <section>
           <h2 className="text-lg font-semibold text-gray-900 mb-2">4. User Accounts</h2>
           <p>
-            You may create a free account using Google OAuth. You are responsible for maintaining the
-            security of your account credentials. You agree not to share your account or use another
-            person&apos;s account without permission.
+            You may create a free account using your email address via a passwordless magic link. You
+            are responsible for maintaining access to your email account. You agree not to share your
+            account or use another person&apos;s account without permission.
           </p>
         </section>
 

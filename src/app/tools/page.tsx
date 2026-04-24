@@ -134,7 +134,7 @@ export default function ToolsPage() {
         <div className="rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 p-6 text-white">
           <h2 className="text-lg font-semibold">Shop &amp; Give Back</h2>
           <p className="text-sm text-emerald-100 mt-1 mb-4">
-            Our partner <strong>SleekGemsHall</strong> offers curated gems &amp; jewelry — and donates <strong>10% of all proceeds to charity.</strong>
+            Our partner <strong>SleekGemsHall</strong> offers a curated collection of beautiful gems &amp; jewelry for every occasion.
           </p>
           <a
             href="https://sleekgemshall.shop/"

@@ -15,8 +15,7 @@ export default function Footer() {
         >
           SleekGemsHall
         </a>
-        {' '}— Beautiful gems &amp; jewelry where{' '}
-        <strong>10% of all proceeds go to charity.</strong>{' '}
+        {' '}— Curated gems &amp; jewelry for every occasion.{' '}
         <Link href="/partners" className="underline hover:text-emerald-100">
           Learn more →
         </Link>

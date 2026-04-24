@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Monitor, Shield, Cpu, Phone, Wifi, HardDrive, Mail, Clock, CheckCircle2, ExternalLink, ArrowRight, Gem, Heart } from 'lucide-react';
+import { Monitor, Shield, Cpu, Phone, Wifi, HardDrive, Mail, Clock, CheckCircle2, ExternalLink, ArrowRight, Gem } from 'lucide-react';
 
 export default function PartnersPage() {
   return (
@@ -119,25 +119,18 @@ export default function PartnersPage() {
               </div>
             </div>
 
-            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1.5 mb-4">
-              <Heart className="h-4 w-4 text-emerald-600" />
-              <span className="text-sm font-semibold text-emerald-700">10% of all proceeds donated to charity</span>
-            </div>
-
             <p className="text-gray-700 mb-4 text-lg font-medium">
               Elegance you can feel good about.
             </p>
 
             <p className="text-gray-600 mb-6">
               SleekGemsHall is a curated gem and jewelry shop offering beautifully crafted pieces at accessible prices.
-              What sets them apart: <strong>10% of every purchase goes directly to charitable causes</strong>,
-              making each piece of jewelry a meaningful contribution to those in need.
+              Whether you&apos;re treating yourself or looking for a thoughtful gift, their sleek, handpicked collection
+              has something for everyone.
             </p>
 
             <p className="text-gray-600 mb-6">
-              Whether you&apos;re treating yourself or looking for a thoughtful gift, shopping at SleekGemsHall means
-              supporting a business that gives back. Discover their collection of sleek, handpicked gems and jewelry
-              that combine style with purpose.
+              Discover their collection of fine gems and jewelry that combine style with quality craftsmanship.
             </p>
 
             <a
@@ -159,11 +152,10 @@ export default function PartnersPage() {
             <div className="space-y-3">
               {[
                 { icon: Gem, label: 'Curated Gem Collection', desc: 'Hand-selected gems and fine jewelry' },
-                { icon: Heart, label: '10% Goes to Charity', desc: 'Every purchase supports charitable causes' },
                 { icon: Shield, label: 'Quality Guaranteed', desc: 'Premium pieces at accessible prices' },
                 { icon: CheckCircle2, label: 'Ethically Sourced', desc: 'Responsibly sourced materials' },
                 { icon: ExternalLink, label: 'Easy Online Shopping', desc: 'Browse and buy from anywhere' },
-                { icon: ArrowRight, label: 'Meaningful Gifts', desc: 'Give beauty that gives back' },
+                { icon: ArrowRight, label: 'Thoughtful Gifts', desc: 'Perfect for any occasion' },
               ].map(item => (
                 <div key={item.label} className="flex items-start gap-3">
                   <div className="rounded-lg bg-emerald-100 p-1.5 mt-0.5">
@@ -179,17 +171,6 @@ export default function PartnersPage() {
           </div>
         </div>
 
-        {/* Charity highlight */}
-        <div className="mt-8 pt-6 border-t border-emerald-100">
-          <div className="rounded-xl bg-emerald-600 p-5 text-white text-center">
-            <Heart className="h-6 w-6 mx-auto mb-2 text-emerald-200" />
-            <p className="font-semibold text-lg mb-1">Shop with Purpose</p>
-            <p className="text-emerald-100 text-sm max-w-xl mx-auto">
-              SleekGemsHall donates <strong className="text-white">10% of all proceeds</strong> to charitable organizations.
-              Every purchase you make helps fund meaningful causes while you enjoy beautiful, quality jewelry.
-            </p>
-          </div>
-        </div>
       </div>
 
       {/* Why Tech Support Matters */}
@@ -242,9 +223,9 @@ export default function PartnersPage() {
           </a>
         </div>
         <div className="rounded-xl bg-emerald-600 p-6 text-center text-white">
-          <h2 className="text-lg font-bold mb-2">Shop & Give Back</h2>
+          <h2 className="text-lg font-bold mb-2">Discover SleekGemsHall</h2>
           <p className="text-emerald-100 mb-4 text-sm">
-            10% of every SleekGemsHall purchase goes to charity. Beautiful jewelry with purpose.
+            Beautiful gems &amp; jewelry, curated for quality and style.
           </p>
           <a
             href="https://sleekgemshall.shop/"
